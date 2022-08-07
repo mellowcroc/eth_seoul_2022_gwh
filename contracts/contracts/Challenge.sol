@@ -12,27 +12,47 @@ contract Challenge {
     string public desc;
 
     uint256 public votableUntil;
-    
+
     mapping(address => bool) public voted;
     uint256 public maxVotes;
     uint256 public yesVotes;
     uint256 public noVotes;
-    
+
     bool public isClosed;
-    
+
     // TODO : CUSTOM START/END
-    constructor(address challenger_, address donation_, string memory desc_) {
+    constructor(
+        address challenger_,
+        address donation_,
+        string memory desc_
+    ) {
         challenger = challenger_;
         donation = donation_;
         desc = desc_;
         votableUntil = block.timestamp + 14 days;
     }
 
-    function vote(bool yn) public {
-        
+    function getInfo() public view returns (address, address, string memory) {
+        return (challenger, donation, desc);
     }
 
-    function closeChallenge() public {
-        
+    function getChallenger() public view returns (address) {
+        return challenger;
     }
+
+    function getDonation() public view returns (address) {
+        return donation;
+    }
+
+    function getDesc() public view returns (string memory) {
+        return desc;
+    }
+
+    function getVotableUntil() public view returns (uint256) {
+        return votableUntil;
+    }
+
+    function vote(bool yn) public {}
+
+    function closeChallenge() public {}
 }

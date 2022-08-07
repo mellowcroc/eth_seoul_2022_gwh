@@ -49,6 +49,7 @@
   "scripts": {
     "test": "hardhat test",
     "build": "hardhat compile && tsc",
-    "hardhat": "hardhat"
+    "hardhat": "hardhat",
+    "prettier:solidity": "./node_modules/.bin/prettier --write contracts/**/*.sol"
   }
 }
