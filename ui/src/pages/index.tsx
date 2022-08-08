@@ -5,28 +5,126 @@ import Slider from "react-slick";
 // Import css files
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import Header from '../components/Header';
 
-const Wrapper = styled.div`
+const HeaderContainer = styled.div`
+  width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+`;
+
+const MainContainer = styled.div`
   text-align: center;
   width: 100%;
+  background: #c3d9eb;
+  // display: flex;
+  // flex-direction: column;
+  // flex-wrap: nowrap;
+  align-items: center;
+  // padding: calc(100vw / 4) 16px 110px 16px;
+  box-sizing: border-box;
+  // gap: 16px;
 `;
 
-const SliderWrapper = styled.div`
+const HeroImage = styled.div`
+  width: 100vw;
+  // height: 100%;
+  aspect-ratio: 1292 / 865;
+  overflow: hidden;
+  position: absolute;
+  top: 64px;
+  background: url("/whale.jpg");
+  background-size: 105% auto;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  image-rendering: -webkit-optimize-contrast;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+`;
+
+const SliderContainer = styled.div`
   padding: 60px;
-`
-
-const CreateButton = styled.button`
-  color: #000;
-  width: 200px;
+  display: block;
 `;
 
-const MyPageButton = styled.button`
-  color: #000;
-  width: 200px;
+const PageContainer = styled.div`
+  z-index: 10;
+  position: relative;
+`;
+
+const MainPhrase = styled.h2`
+  margin: 100px;
+`;
+
+const ButtonWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const CreateButton = styled(Link)`
+  height: 60px;
+  padding: 30px;
+  font-size: 30px;
+  text-decoration: none;
+  background: rgba(0, 140, 210, 0.5);
+  // border: 5px solid rgba(0, 140, 210, 0.5);
+  border-radius: 100px;
+  color: #fff;
+  width: fit-content;
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+`;
+
+const MyPageButton = styled(Link)`
+  height: 60px;
+  padding: 30px;
+  font-size: 30px;
+  text-decoration: none;
+  background: transparent;
+  color: #fff;
+  border: 5px solid #fff7;
+  border-radius: 100px;
+  width: fit-content;
+  display: flex;
+  align-items: center;
+`;
+
+const DonationItem = styled.div`
+  // padding: 2%;
+  text-decoration: none;
+  color: #fff;
+  background: #1674bee8;
+  position: relative;
+  text-align: center;
+  font-size: 20px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  border-radius: 50px;
+`;
+
+const DonationInner = styled.div`
+  padding: 0 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
 `;
 
 const DonationTitle = styled.div`
-  text-decoration: underline;
+  font-weight: 800;
+  padding-bottom: 8px;
+`;
+
+const DonationLink = styled(Link)`
+  font-size: 14px;
+  color: #fff;
+  padding-top: 8px;
 `;
 
 interface DonationPreview {
@@ -45,12 +143,16 @@ class DonationSlideItem extends Component<ISlideItemProps> {
   render() {
     const { donation, ...props } = this.props;
     return (
-      <div {...props}>
-        <DonationTitle>{donation.name}</DonationTitle>
-        <div>{donation.description}</div>
-        <div>Org: {donation.orgAddress}</div>
-        <div>Whale: {donation.whaleAddress}</div>
-        <Link to={`/donation-details?id=${donation.id}`}>See details</Link>
+      <div style={{margin: '10px', padding: '2%'}}>
+        <DonationItem {...props}>
+          <DonationInner>
+            <DonationTitle>{donation.name}</DonationTitle>
+            <div>{donation.description}</div>
+            <div>Org: {donation.orgAddress}</div>
+            <div>Whale: {donation.whaleAddress}</div>
+            <DonationLink to={`/donation-details?id=${donation.id}`}>See details</DonationLink>
+          </DonationInner>
+        </DonationItem>
       </div>
     );
   }
@@ -61,12 +163,15 @@ export default function Home() {
   const sliderSettings = {
     // NOTE(): for other settings, see https://react-slick.neostack.com/docs/example/simple-slider
     infinite: true,
-    className: "center",
+    speed: 500,
+    dots: true,
+    variableWidth: true,
+    // className: "center",
     centerPadding: "60px",
     swipeToSlide: true,
     slidesToShow: 3,
     slidesToScroll: 1,
-    speed: 500
+    // speed: 500
   };
 
   // TODO(): get the actual data from ethereum
@@ -186,52 +291,67 @@ export default function Home() {
 
   return (
     <div style={{width: '100%'}}>
-      <Wrapper>
-        <h1>
-          Good Whale Hunting
-        </h1>
+    <HeaderContainer>
+      <Header />
+    </HeaderContainer>
+      <MainContainer>
+        <HeroImage />
+        <PageContainer>
+          {/* TODO(): header 쪽으로 빼기? */}
+          {/* <h1>
+            Good Whale Hunting
+          </h1> */}
 
-        <CreateButton>
-          <Link to='/create-donation'>Create a new donation</Link>
-        </CreateButton>
+          {/* 다른 더 좋은 phrase 환영합니다!! */}
+          <MainPhrase>
+            Do the most good possible with what you have.
+          </MainPhrase>
 
-        <MyPageButton>
-          <Link to='/my-donations'>View my donations</Link>
-        </MyPageButton>
+          <ButtonWrapper>
+            <CreateButton to='/create-donation'>Create a new donation</CreateButton>
+            <MyPageButton to='/my-donations'>View my donations</MyPageButton>
+          </ButtonWrapper>
 
-        {/* Funding donations */}
-        <SliderWrapper>
-          LIST OF FUNDING DONATIONS
-          <Slider {...sliderSettings}>
-            {
-              fundingDonations
-                .map((donation: DonationPreview, index) => <DonationSlideItem donation={donation} key={index}/>)
-            }
-          </Slider>
-        </SliderWrapper>
+          {/* Funding donations */}
+          <SliderContainer>
+            <h3>
+              List of FUNDING Donations
+            </h3>
+            <Slider {...sliderSettings}>
+              {
+                fundingDonations
+                  .map((donation: DonationPreview, index) => <DonationSlideItem donation={donation} key={index}/>)
+              }
+            </Slider>
+          </SliderContainer>
 
-        {/* Emitting donations */}
-        <SliderWrapper>
-          LIST OF EMITTING DONATIONS
-          <Slider {...sliderSettings}>
-            {
-              emittingDonations
-                .map((donation: DonationPreview, index) => <DonationSlideItem donation={donation} key={index}/>)
-            }
-          </Slider>
-        </SliderWrapper>
+          {/* Emitting donations */}
+          <SliderContainer>
+            <h3>
+              List of EMITTING Donations
+            </h3>
+            <Slider {...sliderSettings}>
+              {
+                emittingDonations
+                  .map((donation: DonationPreview, index) => <DonationSlideItem donation={donation} key={index}/>)
+              }
+            </Slider>
+          </SliderContainer>
 
-        {/* Stopped / Finished donations */}
-        <SliderWrapper>
-          LIST OF PAST DONATIONS
-          <Slider {...sliderSettings}>
-            {
-              finishedDonations
-                .map((donation: DonationPreview, index) => <DonationSlideItem donation={donation} key={index}/>)
-            }
-          </Slider>
-        </SliderWrapper>
-      </Wrapper>
+          {/* Stopped / Finished donations */}
+          <SliderContainer>
+            <h3>
+              List of PAST Donations
+            </h3>
+            <Slider {...sliderSettings}>
+              {
+                finishedDonations
+                  .map((donation: DonationPreview, index) => <DonationSlideItem donation={donation} key={index}/>)
+              }
+            </Slider>
+          </SliderContainer>
+        </PageContainer>
+      </MainContainer>
     </div>
   );
 }
