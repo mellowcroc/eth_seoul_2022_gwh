@@ -71,7 +71,6 @@ const CreateButton = styled(Link)`
   font-size: 30px;
   text-decoration: none;
   background: rgba(0, 140, 210, 0.5);
-  // border: 5px solid rgba(0, 140, 210, 0.5);
   border-radius: 100px;
   color: #fff;
   width: fit-content;
@@ -81,7 +80,7 @@ const CreateButton = styled(Link)`
 `;
 
 const MyPageButton = styled(Link)`
-  height: 60px;
+  height: 50px;
   padding: 30px;
   font-size: 30px;
   text-decoration: none;
@@ -297,11 +296,6 @@ export default function Home() {
       <MainContainer>
         <HeroImage />
         <PageContainer>
-          {/* TODO(): header 쪽으로 빼기? */}
-          {/* <h1>
-            Good Whale Hunting
-          </h1> */}
-
           {/* 다른 더 좋은 phrase 환영합니다!! */}
           <MainPhrase>
             Do the most good possible with what you have.
@@ -315,7 +309,7 @@ export default function Home() {
           {/* Funding donations */}
           <SliderContainer>
             <h3>
-              List of FUNDING Donations
+              Funding Donations
             </h3>
             <Slider {...sliderSettings}>
               {
@@ -328,7 +322,7 @@ export default function Home() {
           {/* Emitting donations */}
           <SliderContainer>
             <h3>
-              List of EMITTING Donations
+              Emitting Donations
             </h3>
             <Slider {...sliderSettings}>
               {
@@ -341,7 +335,7 @@ export default function Home() {
           {/* Stopped / Finished donations */}
           <SliderContainer>
             <h3>
-              List of PAST Donations
+              Past Donations
             </h3>
             <Slider {...sliderSettings}>
               {
