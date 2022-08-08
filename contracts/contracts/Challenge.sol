@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
+import "./Donation.sol";
 
 contract Challenge {
     enum ChallengeStatus {
@@ -28,8 +29,8 @@ contract Challenge {
 
     ChallengeStatus public status;
 
-    constructor(address donation_) {
-        donation = donation_;
+    constructor() {
+        donation = msg.sender;
     }
 
     // TODO : CUSTOM START/END
@@ -88,7 +89,10 @@ contract Challenge {
 
     function vote(bool yn) public {
         require(block.timestamp < votableUntil, "Vote perioed has ended.");
-        // reqire if voter is user
+        require(
+            Donation(donation).isDonatedAddr(msg.sender),
+            "Only donated user can vote."
+        );
         require(!voted[msg.sender], "Already voted.");
         voted[msg.sender] = true;
         if (yn) {
@@ -103,12 +107,12 @@ contract Challenge {
         require(status == ChallengeStatus.Ongoing, "This challenge has ended.");
 
         uint256 votePermil = (yesVotes * 1000) / maxVoter;
-        uint256 yesPermil = (yesVotes * 1000) / (yesVotes + noVotes);
-        if (
-            votePermil >= quorumPermil &&
-            yesPermil >= requiredApprovalRatioPermil
-        ) {
-            status = ChallengeStatus.Approved;
+        if (votePermil >= quorumPermil) {
+            // to prevent div by zero
+            uint256 yesPermil = (yesVotes * 1000) / (yesVotes + noVotes);
+            if (yesPermil >= requiredApprovalRatioPermil) {
+                status = ChallengeStatus.Approved;
+            }
         } else {
             status = ChallengeStatus.Disapproved;
         }

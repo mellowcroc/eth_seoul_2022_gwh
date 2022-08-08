@@ -2,7 +2,12 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import hre, { ethers } from "hardhat";
-import { Donation, USDC, Donation__factory } from "../typechain";
+import {
+  Donation,
+  USDC,
+  Donation__factory,
+  Challenge__factory,
+} from "../typechain";
 
 describe("Donation", function () {
   let whale: SignerWithAddress;
@@ -76,6 +81,27 @@ describe("Donation", function () {
     }
   });
   // TODO: Add test for opening challenges and stopping donation emission
+  it("challenger can open challenges", async function () {
+    await donation.openChallenge("Here comes a new challenge");
+
+    await expect(
+      donation.openChallenge("Duplicated challenge")
+    ).to.be.revertedWith("Ongoing or Approved challenge exists");
+  });
+
+  it("emission should stop when challenge accepted", async function () {
+    const challengeAddr = await donation.getRecentChallenge();
+    const challenge = Challenge__factory.connect(challengeAddr, user1);
+    await challenge.vote(true);
+
+    await challenge.connect(user2).vote(true);
+
+    await ethers.provider.send("evm_increaseTime", [14 * 60 * 60 * 24 + 1000]);
+    await ethers.provider.send("evm_mine", []);
+
+    await challenge.closeChallenge();
+    await donation.stop();
+  });
 });
 
 function convertTo18Decimals(num: number) {

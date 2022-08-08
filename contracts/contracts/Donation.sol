@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
 import "./DonationFactory.sol";
+import "./Challenge.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract Donation {
@@ -35,6 +36,7 @@ contract Donation {
     uint256 public emissionDuration = 300 days;
     uint256 public emissionRate = 30 days;
     bool public emissionStopped;
+    uint256 public donatedUsers;
     mapping(address => uint256) public userDonations;
     mapping(address => bool) public userRefunded;
     uint256 public userDonationTotalAmount;
@@ -44,7 +46,7 @@ contract Donation {
 
     address factory;
 
-    constructor() public {
+    constructor() {
         factory = msg.sender;
     }
 
@@ -75,6 +77,7 @@ contract Donation {
         bounty = bounty_;
         createdAt = block.timestamp;
         expireAt = createdAt + duration_;
+        donatedUsers = 0;
     }
 
     function donate(uint256 amount) public {
@@ -90,6 +93,10 @@ contract Donation {
             }
         }
         userDonationTotalAmount += amount;
+        // XXX : is this value initialized automatically?
+        if (userDonations[msg.sender] == 0) {
+            donatedUsers++;
+        }
         userDonations[msg.sender] += amount;
     }
 
@@ -164,22 +171,42 @@ contract Donation {
         }
     }
 
-    function openChallenge() public {
-        // TODO: require that there is no ongoing challenge
-        // TODO: create challenge address and store it in challenges
-        // bytes memory bytecode = type(Challenge).creationCode;
-        // bytes32 salt = keccak256(abi.encodePacked(challenges.length));
-        // address challenge;
-        // assembly {
-        //     challenge := create2(0, add(bytecode, 32), mload(bytecode), salt)
-        // }
+    function openChallenge(string calldata desc) public {
+        // XXX : can user open challenge in donate stage?
+        require(
+            challenges.length == 0 ||
+                (challenges.length > 0 &&
+                    Challenge(challenges[challenges.length - 1])
+                        .getChallengeStatus() ==
+                    Challenge.ChallengeStatus.Disapproved),
+            "Ongoing or Approved challenge exists"
+        );
+        bytes memory bytecode = type(Challenge).creationCode;
+        bytes32 salt = keccak256(abi.encodePacked(challenges.length));
+        address challenge;
+        assembly {
+            challenge := create2(0, add(bytecode, 32), mload(bytecode), salt)
+        }
+        // users and whale can vote
+        Challenge(challenge).initialize(msg.sender, desc, donatedUsers + 1);
+        challenges.push(challenge);
+    }
+
+    function getRecentChallenge() public view returns (address) {
+        require(challenges.length > 0, "no challenges exist");
+        return challenges[challenges.length - 1];
+    }
+
+    function isDonatedAddr(address user) public view returns (bool) {
+        return userDonations[user] > 0 || user == whale;
     }
 
     function stop() public {
         require(challenges.length > 0, "no challenges exist");
         require(
-            msg.sender == challenges[challenges.length - 1],
-            "can only be called by the challenge contract"
+            Challenge(challenges[challenges.length - 1]).getChallengeStatus() ==
+                Challenge.ChallengeStatus.Approved,
+            "recent challenge is not approved"
         );
         emissionStopped = true;
     }

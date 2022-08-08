@@ -1,7 +1,12 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { Challenge, Challenge__factory } from "../typechain";
+import {
+  Challenge,
+  Challenge__factory,
+  Donation,
+  Donation__factory,
+} from "../typechain";
 
 enum ChallengeStatus {
   Ongoing,
@@ -15,23 +20,56 @@ describe("Challenger", function () {
   let addr2: SignerWithAddress;
   let addr3: SignerWithAddress;
   let addr4: SignerWithAddress;
+  let whale: SignerWithAddress;
+  let org: SignerWithAddress;
   let challenge: Challenge;
-  const MAXVOTER = 3;
+  let donation: Donation;
 
   before(async () => {
-    [challenger, addr1, addr2, addr3, addr4] = await ethers.getSigners();
+    [challenger, addr1, addr2, addr3, addr4, whale, org] =
+      await ethers.getSigners();
+
+    const USDC = await ethers.getContractFactory("USDC");
+    const usdc = await USDC.deploy(
+      ethers.BigNumber.from(30_000).mul(ethers.BigNumber.from(10).pow(18))
+    );
+
+    await usdc.transfer(whale.address, convertTo18Decimals(12_000));
+    const DonationFactory = await ethers.getContractFactory("DonationFactory");
+    const donationFactory = await DonationFactory.deploy(usdc.address);
+    await usdc.approve(donationFactory.address, convertTo18Decimals(10_000));
+    await donationFactory.createWhaleDonation(
+      "Save The Whales",
+      "Effort to halt commercial whaling",
+      org.address,
+      convertTo18Decimals(10_000),
+      50,
+      convertTo18Decimals(500),
+      3600 * 24 * 30 // 30 days
+    );
+    const donationAddress = await donationFactory.allDonations(0);
+    donation = Donation__factory.connect(donationAddress, whale);
+
+    const donationAmount = convertTo18Decimals(1000);
+    for (const u of [addr1, addr2, addr3, addr4]) {
+      await usdc.transfer(u.address, donationAmount);
+
+      await usdc.connect(u).approve(donationAddress, donationAmount);
+      await donation.connect(u).donate(donationAmount);
+    }
+
+    await ethers.provider.send("evm_increaseTime", [3600 * 24 * 30]);
+    await ethers.provider.send("evm_mine", []);
   });
 
   it("Should deploy and initialize challenge", async function () {
-    const Challenge = await ethers.getContractFactory("Challenge");
-    challenge = await Challenge.deploy(await addr1.address);
-
-    await challenge.deployed();
+    await donation.connect(challenger).openChallenge("Simple vote");
+    const challengeAddr = await donation.getRecentChallenge();
+    challenge = Challenge__factory.connect(challengeAddr, challenger);
 
     const ts = (await ethers.provider.getBlock("latest")).timestamp;
-    await challenge.initialize(challenger.address, "Simple vote", MAXVOTER);
     expect(await challenge.getChallenger()).to.equal(challenger.address);
-    expect(await challenge.getDonation()).to.equal(addr1.address);
+    expect(await challenge.getDonation()).to.equal(donation.address);
     expect(await challenge.getDesc()).to.equal("Simple vote");
     expect(await challenge.getChallengeStatus()).to.equal(
       ChallengeStatus.Ongoing
@@ -39,11 +77,8 @@ describe("Challenger", function () {
     const [yesVotes, noVotes, maxVoter] = await challenge.getVoteInfo();
     expect(yesVotes).to.equal(0);
     expect(noVotes).to.equal(0);
-    expect(maxVoter).to.equal(MAXVOTER);
-    // XXX : why +1 diff
-    expect(await challenge.getVotableUntil()).to.equal(
-      ts + 14 * 60 * 60 * 24 + 1
-    );
+    expect(maxVoter).to.equal(5);
+    expect(await challenge.getVotableUntil()).to.equal(ts + 14 * 60 * 60 * 24);
   });
 
   it("Users should vote, non-users shouldnt vote", async function () {
@@ -118,3 +153,7 @@ describe("Challenger", function () {
     );
   });
 });
+
+function convertTo18Decimals(num: number) {
+  return ethers.BigNumber.from(num).mul(ethers.BigNumber.from(10).pow(18));
+}
