@@ -1,4 +1,3 @@
-import React from "react";
 import { Routes, Route } from 'react-router-dom';
 import { useEthers } from "@usedapp/core";
 import "./App.css";
@@ -14,7 +13,8 @@ const Header = styled.header`
 `;
 
 function App() {
-  const { chainId } = useEthers();
+  const { chainId, active, account } = useEthers();
+  console.log("ethers state:", chainId, active, account);
 
   return (
     <div className="App">

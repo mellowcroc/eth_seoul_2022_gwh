@@ -2,9 +2,11 @@ import React, { useState, Component } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import Slider from "react-slick";
+import { useEthers } from '@usedapp/core';
 // Import css files
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import Connect from '../../components/Connect';
 
 const Wrapper = styled.div`
   text-align: center;
@@ -56,6 +58,7 @@ export default function MyDonations() {
     slidesToScroll: 1,
     speed: 500
   };
+  const { account } = useEthers();
   // TODO(): get the actual data from ethereum
   const [donations, setDonations] = useState([
     {
@@ -107,15 +110,25 @@ export default function MyDonations() {
           My Donations
         </h1>
 
-        <SliderWrapper>
-          LIST OF FUNDING DONATIONS
-          <Slider {...sliderSettings}>
-            {
-              donations
-                .map((donation: DonationPreview, index) => <DonationSlideItem donation={donation} key={index}/>)
-            }
-          </Slider>
-        </SliderWrapper>
+        {/* My donation list */}
+        {
+          account && (
+            <SliderWrapper>
+              LIST OF FUNDING DONATIONS
+              <Slider {...sliderSettings}>
+                {
+                  donations
+                    .map((donation: DonationPreview, index) => <DonationSlideItem donation={donation} key={index}/>)
+                }
+              </Slider>
+            </SliderWrapper>
+          )
+        }
+
+        {/* Connect Wallet Popup */}
+        {
+          !account && <Connect />
+        }
       </Wrapper>
     </div>
   );
