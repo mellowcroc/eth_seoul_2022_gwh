@@ -51,5 +51,9 @@
     "build": "hardhat compile && tsc",
     "hardhat": "hardhat",
     "prettier:solidity": "./node_modules/.bin/prettier --write contracts/**/*.sol"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.7.2",
+    "hardhat-contract-sizer": "^2.6.1"
   }
 }
