@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
 import "./DonationFactory.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract Donation {
     struct Report {
@@ -17,35 +18,29 @@ contract Donation {
         uint256
     );
 
-    bytes4 private constant TRANSFER_SELECTOR_1 =
-        bytes4(keccak256(bytes("transfer(address,uint256)")));
-
-    bytes4 private constant TRANSFER_SELECTOR_2 =
-        bytes4(keccak256(bytes("transfer(address,address,uint256)")));
-
-    address token;
-    uint256 id;
-    string name;
-    string description;
-    address org;
-    address whale;
-    bool whaleRefunded;
-    uint256 whaleDonationMax; // min 5,000 USDC
-    uint256 whaleDonationTotalAmount;
-    uint256 bounty; // min 500 USDC
-    uint256 matchPercentage; // min 10%
-    uint256 withdrawnAmount;
-    uint256 createdAt;
-    uint256 expireAt;
-    uint256 emissionDuration = 300 days;
-    uint256 emissionRate = 30 days;
-    bool emissionStopped;
-    mapping(address => uint256) userDonations;
-    mapping(address => bool) userRefunded;
-    uint256 userDonationTotalAmount;
-    address[] challenges;
-    Report[] reports;
-    bool refundMatch;
+    address public token;
+    uint256 public id;
+    string public name;
+    string public description;
+    address public org;
+    address public whale;
+    bool public whaleRefunded;
+    uint256 public whaleDonationMax; // min 5,000 USDC
+    uint256 public whaleDonationTotalAmount;
+    uint256 public bounty; // min 500 USDC
+    uint256 public matchPercentage; // min 10%
+    uint256 public withdrawnAmount;
+    uint256 public createdAt;
+    uint256 public expireAt;
+    uint256 public emissionDuration = 300 days;
+    uint256 public emissionRate = 30 days;
+    bool public emissionStopped;
+    mapping(address => uint256) public userDonations;
+    mapping(address => bool) public userRefunded;
+    uint256 public userDonationTotalAmount;
+    address[] public challenges;
+    Report[] public reports;
+    bool public refundMatch;
 
     address factory;
 
@@ -57,6 +52,7 @@ contract Donation {
         address token_,
         string calldata name_,
         string calldata description_,
+        address whale_,
         address org_,
         uint256 whaleDonationMax_,
         uint256 matchPercentage_,
@@ -72,6 +68,7 @@ contract Donation {
         token = token_;
         name = name_;
         description = description_;
+        whale = whale_;
         org = org_;
         whaleDonationMax = whaleDonationMax_;
         matchPercentage = matchPercentage_;
@@ -80,38 +77,9 @@ contract Donation {
         expireAt = createdAt + duration_;
     }
 
-    function _safeTransfer(
-        address token_,
-        address to_,
-        uint256 value_
-    ) private {
-        (bool success, bytes memory data) = token_.call(
-            abi.encodeWithSelector(TRANSFER_SELECTOR_1, to_, value_)
-        );
-        require(
-            success && (data.length == 0 || abi.decode(data, (bool))),
-            "transfer failed"
-        );
-    }
-
-    function _safeTransfer(
-        address token_,
-        address from_,
-        address to_,
-        uint256 value_
-    ) private {
-        (bool success, bytes memory data) = token_.call(
-            abi.encodeWithSelector(TRANSFER_SELECTOR_2, from_, to_, value_)
-        );
-        require(
-            success && (data.length == 0 || abi.decode(data, (bool))),
-            "transfer failed"
-        );
-    }
-
     function donate(uint256 amount) public {
         require(block.timestamp < expireAt, "donation stage has ended");
-        _safeTransfer(token, msg.sender, address(this), amount);
+        IERC20(token).transferFrom(msg.sender, address(this), amount);
         if (whaleDonationMax - whaleDonationTotalAmount > 0) {
             uint256 matchAmount = min(
                 (amount * matchPercentage) / 100,
@@ -122,6 +90,7 @@ contract Donation {
             }
         }
         userDonationTotalAmount += amount;
+        userDonations[msg.sender] += amount;
     }
 
     function createReport(bytes32 ipfsHash) public {
@@ -137,16 +106,15 @@ contract Donation {
         require(msg.sender == org, "only org can withdraw");
         require(!emissionStopped, "cannot withdraw if stopped");
         uint256 epoch = (block.timestamp - expireAt) / emissionRate; // epoch 0 ~ 10
-        uint256 maxWithdrawAmount = ((whaleDonationTotalAmount +
-            userDonationTotalAmount) * epoch) /
-            (emissionRate / emissionDuration);
-        if (withdrawnAmount < maxWithdrawAmount) {
-            withdrawnAmount = maxWithdrawAmount;
-            _safeTransfer(
-                token,
+        uint256 maxWithdrawableAmount = (((whaleDonationTotalAmount +
+            userDonationTotalAmount) * epoch) * emissionRate) /
+            emissionDuration;
+        if (withdrawnAmount < maxWithdrawableAmount) {
+            IERC20(token).transfer(
                 msg.sender,
-                maxWithdrawAmount - withdrawnAmount
+                maxWithdrawableAmount - withdrawnAmount
             );
+            withdrawnAmount = maxWithdrawableAmount;
         }
     }
 
@@ -165,36 +133,33 @@ contract Donation {
         if (emissionStopped) {
             if (msg.sender == whale && !whaleRefunded) {
                 whaleRefunded = true;
-                _safeTransfer(
-                    token,
-                    whale,
+                IERC20(token).transferFrom(
+                    address(this),
+                    msg.sender,
                     calculateRefundAmount(whaleDonationTotalAmount)
                 );
             } else if (
                 userDonations[msg.sender] > 0 && !userRefunded[msg.sender]
             ) {
                 userRefunded[msg.sender] = true;
-                _safeTransfer(
-                    token,
+                IERC20(token).transfer(
                     msg.sender,
                     calculateRefundAmount(userDonations[msg.sender])
                 );
             }
             return;
         }
-
         if (block.timestamp >= expireAt) {
             if (
                 msg.sender == whale &&
                 !refundMatch &&
                 whaleDonationMax - whaleDonationTotalAmount > 0
             ) {
-                _safeTransfer(
-                    token,
+                refundMatch = true;
+                IERC20(token).transfer(
                     msg.sender,
                     whaleDonationMax - whaleDonationTotalAmount
                 );
-                refundMatch = true;
             }
         }
     }

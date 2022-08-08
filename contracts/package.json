@@ -52,6 +52,7 @@
     "hardhat": "hardhat"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.7.2"
+    "@openzeppelin/contracts": "^4.7.2",
+    "hardhat-contract-sizer": "^2.6.1"
   }
 }

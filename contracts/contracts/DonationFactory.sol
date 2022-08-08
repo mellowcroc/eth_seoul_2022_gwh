@@ -36,6 +36,7 @@ contract DonationFactory {
             token,
             name_,
             description_,
+            msg.sender,
             org_,
             whaleDonationMax_,
             matchPercentage_,
