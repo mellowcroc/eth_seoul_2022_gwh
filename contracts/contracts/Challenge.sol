@@ -106,6 +106,7 @@ contract Challenge {
         require(block.timestamp > votableUntil, "Vote perioed has not ended.");
         require(status == ChallengeStatus.Ongoing, "This challenge has ended.");
 
+        status = ChallengeStatus.Disapproved;
         uint256 votePermil = (yesVotes * 1000) / maxVoter;
         if (votePermil >= quorumPermil) {
             // to prevent div by zero
@@ -113,8 +114,6 @@ contract Challenge {
             if (yesPermil >= requiredApprovalRatioPermil) {
                 status = ChallengeStatus.Approved;
             }
-        } else {
-            status = ChallengeStatus.Disapproved;
         }
     }
 
