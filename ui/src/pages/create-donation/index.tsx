@@ -1,5 +1,4 @@
 import { useEthers } from '@usedapp/core';
-import React, { useContext } from 'react';
 import styled from 'styled-components';
 
 const Wrapper = styled.div`

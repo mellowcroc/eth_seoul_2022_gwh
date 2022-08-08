@@ -23,9 +23,9 @@ function App() {
         {chainId === 4 && (
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="my-donations" element={<MyDonations />} />
-            <Route path="create-donation" element={<CreateDonation />} />
-            <Route path="donation-details" element={<DonationDetails />} />
+            <Route path="/my-donations" element={<MyDonations />} />
+            <Route path="/create-donation" element={<CreateDonation />} />
+            <Route path="/donation-details" element={<DonationDetails />} />
           </Routes>
         )}
       </Header>

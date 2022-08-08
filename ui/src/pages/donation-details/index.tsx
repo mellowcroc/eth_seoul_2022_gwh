@@ -1,17 +1,18 @@
-import React, { useContext } from 'react';
 import styled from 'styled-components';
+import { useQuery } from '../../hooks/useQuery';
 
 const Wrapper = styled.div`
   text-align: center;
 `;
 
 export default function DonationDetails() {
+  const query = useQuery();
 
   return (
     <div>
       <Wrapper>
         <h1>
-          Donation Details
+          {`Donation Details of "${query.get('id')}"`}
         </h1>
         {/* 
         - id
