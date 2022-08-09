@@ -178,6 +178,10 @@ contract Donation {
         }
     }
 
+    function getDAOAddress() public view returns (address) {
+        return factory;
+    }
+
     function openChallenge(string calldata desc) public {
         // XXX : can user open challenge in donate stage?
         require(
@@ -188,6 +192,8 @@ contract Donation {
                     Challenge.ChallengeStatus.Disapproved),
             "Ongoing or Approved challenge exists"
         );
+        DonationFactory(factory).reserveChallengeCollatral(msg.sender);
+
         bytes memory bytecode = type(Challenge).creationCode;
         bytes32 salt = keccak256(abi.encodePacked(challenges.length));
         address challenge;
