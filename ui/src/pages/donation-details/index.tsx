@@ -1,10 +1,41 @@
 import { useEthers } from '@usedapp/core';
 import { useState } from 'react';
 import styled from 'styled-components';
+import Header from '../../components/Header';
 import { useQuery } from '../../hooks/useQuery';
 
 const Wrapper = styled.div`
   text-align: center;
+`;
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100vh;
+`;
+
+const HeaderContainer = styled.div`
+  width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+`;
+
+const Content = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80px 16px;
+  min-height: 100vh;
+  min-height: 100vh;
+  gap: 40px;
+  text-align: center;
+  width: 100%;
+  background: #c3d9eb;
+  align-items: center;
+  box-sizing: border-box;
 `;
 
 const Id = styled.div``;
@@ -57,8 +88,11 @@ export default function DonationDetails() {
   });
 
   return (
-    <div>
-      <Wrapper>
+    <Container>
+      <HeaderContainer>
+        <Header />
+      </HeaderContainer>
+      <Content>
         <h1>
           {`Donation Details of "${query.get('id')}"`}
         </h1>
@@ -109,7 +143,7 @@ export default function DonationDetails() {
                 <Report key={`report-${index}`}>{report}</Report>)
           }
         </ReportWrapper>
-      </Wrapper>
-    </div>
+      </Content>
+    </Container>
   );
 }

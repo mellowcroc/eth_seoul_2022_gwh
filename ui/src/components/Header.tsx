@@ -29,6 +29,11 @@ const MenuContainer = styled.div`
   color: black;
 `;
 
+const LogoLink = styled(Link)`
+  font-size: 30px;
+  text-decoration: none;
+`;
+
 const MenuLink = styled(Link)`
   font-size: 16px;
 `;
@@ -61,7 +66,9 @@ function Header() {
   return (
     <Container>
       <MenuContainer>
-        Good Whale Hunting
+        <LogoLink to='/'>
+          Good Whale Hunting
+        </LogoLink>
         <MenuLink to='/create-donation'>
           Are you a Whale?
         </MenuLink>

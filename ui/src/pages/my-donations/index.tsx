@@ -7,10 +7,42 @@ import { useEthers } from '@usedapp/core';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Connect from '../../components/Connect';
+import Header from '../../components/Header';
 
 const Wrapper = styled.div`
   text-align: center;
 `;
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100vh;
+`;
+
+const HeaderContainer = styled.div`
+  width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+`;
+
+const Content = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80px 16px;
+  min-height: 100vh;
+  min-height: 100vh;
+  gap: 40px;
+  text-align: center;
+  width: 100%;
+  background: #c3d9eb;
+  align-items: center;
+  box-sizing: border-box;
+`;
+
 
 const SliderWrapper = styled.div`
   padding: 60px;
@@ -104,8 +136,11 @@ export default function MyDonations() {
   ]);
 
   return (
-    <div>
-      <Wrapper>
+    <Container>
+      <HeaderContainer>
+        <Header />
+      </HeaderContainer>
+      <Content>
         <h1>
           My Donations
         </h1>
@@ -129,7 +164,7 @@ export default function MyDonations() {
         {
           !account && <Connect />
         }
-      </Wrapper>
-    </div>
+      </Content>
+    </Container>
   );
 }
