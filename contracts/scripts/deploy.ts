@@ -1,25 +1,53 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// When running the script with `npx hardhat run <script>` you'll find the Hardhat
-// Runtime Environment's members available in the global scope.
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ethers } from "hardhat";
+import { Donation, DonationFactory, USDC } from "../typechain";
+
+let admin: SignerWithAddress;
+let org: SignerWithAddress;
+let whale: SignerWithAddress;
+let challenger: SignerWithAddress;
+let user1: SignerWithAddress;
+let user2: SignerWithAddress;
+let user3: SignerWithAddress;
+let user4: SignerWithAddress;
+
+let usdc: USDC;
+let donationFactory: DonationFactory;
+let funDonation: Donation;
+let emiDonation: Donation;
+let clsDonation: Donation;
+let stpDonation: Donation;
+let finDonation: Donation;
+
+async function deployContract() {
+  console.log("Deploying contracts...");
+  [admin, org, whale, challenger, user1, user2, user3, user4] =
+    await ethers.getSigners();
+
+  const USDC = await ethers.getContractFactory("USDC");
+  usdc = await USDC.deploy(
+    ethers.BigNumber.from(100_000).mul(ethers.BigNumber.from(10).pow(18))
+  );
+  console.log("USDC deployed to:", usdc.address);
+
+  const DonationFactory = await ethers.getContractFactory("DonationFactory");
+  donationFactory = await DonationFactory.deploy(usdc.address);
+  console.log("Donation factory deployed to:", donationFactory.address);
+}
+
+async function generateFundingStateDonation() {}
+
+async function generateEmissionStateDonation() {}
+
+async function generateChallengingStateDonation() {}
+
+async function generateStoppedStateDonation() {}
+
+async function generateFinishedStateDonation() {}
 
 async function main() {
-  // Hardhat always runs the compile task when running scripts with its command
-  // line interface.
-  //
-  // If this script is run directly using `node` you may want to call compile
-  // manually to make sure everything is compiled
-  // await hre.run('compile');
-
-  // We get the contract to deploy
-  const Greeter = await ethers.getContractFactory("Greeter");
-  const greeter = await Greeter.deploy("Hello, Hardhat!");
-
-  await greeter.deployed();
-
-  console.log("Greeter deployed to:", greeter.address);
+  await deployContract();
+  
 }
 
 // We recommend this pattern to be able to use async/await everywhere
