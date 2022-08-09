@@ -14,13 +14,12 @@ describe("Donation", function () {
   let org: SignerWithAddress;
   let user1: SignerWithAddress;
   let user2: SignerWithAddress;
-  let dao: SignerWithAddress;
   let challenger: SignerWithAddress;
   let usdc: USDC;
   let donationAddress: string;
   let donation: Donation;
   before(async () => {
-    [whale, org, user1, user2, challenger, dao] = await ethers.getSigners();
+    [whale, org, user1, user2, challenger] = await ethers.getSigners();
   });
   it("Should create new donation", async function () {
     const USDC = await ethers.getContractFactory("USDC");
