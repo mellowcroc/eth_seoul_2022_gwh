@@ -50,7 +50,7 @@ const SliderContainer = styled.div`
   display: block;
 `;
 
-const PageContainer = styled.div`
+const Content = styled.div`
   z-index: 10;
   position: relative;
 `;
@@ -295,7 +295,7 @@ export default function Home() {
       </HeaderContainer>
       <MainContainer>
         <HeroImage />
-        <PageContainer>
+        <Content>
           {/* 다른 더 좋은 phrase 환영합니다!! */}
           <MainPhrase>
             Do the most good possible with what you have.
@@ -344,7 +344,7 @@ export default function Home() {
               }
             </Slider>
           </SliderContainer>
-        </PageContainer>
+        </Content>
       </MainContainer>
     </div>
   );
