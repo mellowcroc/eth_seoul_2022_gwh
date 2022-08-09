@@ -1,6 +1,6 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ethers } from "hardhat";
-import { Donation, DonationFactory, USDC } from "../typechain";
+import { Donation, DonationFactory, USDC, USDC__factory } from "../typechain";
 
 let admin: SignerWithAddress;
 let org: SignerWithAddress;
@@ -19,6 +19,10 @@ let clsDonation: Donation;
 let stpDonation: Donation;
 let finDonation: Donation;
 
+function convertTo18Decimals(num: number) {
+  return ethers.BigNumber.from(num).mul(ethers.BigNumber.from(10).pow(18));
+}
+
 async function deployContract() {
   console.log("Deploying contracts...");
   [admin, org, whale, challenger, user1, user2, user3, user4] =
@@ -33,6 +37,25 @@ async function deployContract() {
   const DonationFactory = await ethers.getContractFactory("DonationFactory");
   donationFactory = await DonationFactory.deploy(usdc.address);
   console.log("Donation factory deployed to:", donationFactory.address);
+  console.log("===========================");
+}
+
+async function distributeTokens() {
+  console.log("Distributing tokens...");
+  const whaleAmount = convertTo18Decimals(5000 * 5);
+  const userAmount = convertTo18Decimals(1000 * 5);
+  const challengerAmount = convertTo18Decimals(50);
+
+  await usdc.transfer(whale.address, whaleAmount);
+  console.log(`Distribute ${whale.address} USDC to ${whaleAmount}`);
+  await usdc.transfer(challenger.address, challengerAmount);
+  console.log(`Distribute ${challenger.address} USDC to ${challengerAmount}`);
+
+  for (const u of [user1, user2, user3]) {
+    await usdc.transfer(u.address, userAmount);
+    console.log(`Distribute ${u.address} USDC to ${userAmount}`);
+  }
+  console.log("===========================");
 }
 
 async function generateFundingStateDonation() {}
@@ -47,7 +70,7 @@ async function generateFinishedStateDonation() {}
 
 async function main() {
   await deployContract();
-  
+  await distributeTokens();
 }
 
 // We recommend this pattern to be able to use async/await everywhere
