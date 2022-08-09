@@ -7,7 +7,7 @@ import "./Donation.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract DonationFactory {
-    uint256 public CHALLENGE_COLLATRAL = 50e18;
+    uint256 public CHALLENGE_COLLATERAL = 50e18;
     address public token;
     address[] public allDonations;
 
@@ -15,8 +15,8 @@ contract DonationFactory {
         token = token_;
     }
 
-    function reserveChallengeCollatral(address sender) public {
-        IERC20(token).transferFrom(sender, address(this), CHALLENGE_COLLATRAL);
+    function reserveChallengeCollateral(address sender) public {
+        IERC20(token).transferFrom(sender, address(this), CHALLENGE_COLLATERAL);
     }
 
     function createWhaleDonation(

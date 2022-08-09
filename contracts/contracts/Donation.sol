@@ -192,7 +192,7 @@ contract Donation {
                     Challenge.ChallengeStatus.Disapproved),
             "Ongoing or Approved challenge exists"
         );
-        DonationFactory(factory).reserveChallengeCollatral(msg.sender);
+        DonationFactory(factory).reserveChallengeCollateral(msg.sender);
 
         bytes memory bytecode = type(Challenge).creationCode;
         bytes32 salt = keccak256(abi.encodePacked(challenges.length));
