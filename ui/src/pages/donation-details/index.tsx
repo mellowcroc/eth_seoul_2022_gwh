@@ -2,11 +2,8 @@ import { useEthers } from '@usedapp/core';
 import { useState } from 'react';
 import styled from 'styled-components';
 import Header from '../../components/Header';
+import { useDonation } from '../../hooks/useDonation';
 import { useQuery } from '../../hooks/useQuery';
-
-const Wrapper = styled.div`
-  text-align: center;
-`;
 
 const Container = styled.div`
   display: flex;
@@ -67,25 +64,10 @@ const Report = styled.div``;
 
 export default function DonationDetails() {
   const query = useQuery();
-  const donationId = query.get('id');
+  const donationId = parseInt(query.get('id') || '');
   const { account } = useEthers();
-  // TODO(): get the actual data from ethereum
-  const [donation, setDonation] = useState({
-    id: donationId,
-    name: `Donation ${donationId}`,
-    stage: 'Funding',
-    description: 'Description..... blabalbalbalblablalbllab',
-    whaleAddress: '0xABCD...ABCD',
-    orgAddress: '0x1234...1234',
-    bountyPool: 1000,
-    matchAmount: 50000,
-    matchPercent: 100,
-    matchExpireAt: new Date('2022-09-08').getTime(),
-    userDonations: [],
-    matchedTotal: 5000,
-    challenges: [],
-    reports: [],
-  });
+  const { donations } = useDonation('', account); // TODO
+  const donation = isNaN(donationId) ? null : donations.find((x) => x.id === donationId);
 
   return (
     <Container>
@@ -93,56 +75,64 @@ export default function DonationDetails() {
         <Header />
       </HeaderContainer>
       <Content>
-        <h1>
-          {`Donation Details of "${query.get('id')}"`}
-        </h1>
-
-        <Id>ID: {donation.id}</Id>
-
-        <Name>Name: {donation.name}</Name>
-
-        <Description>Description: {donation.description}</Description>
-
-        <Stage>Stage: {donation.stage}</Stage>
-
-        <Organization>Organization: {donation.orgAddress}</Organization>
-
-        <Whale>Whale: {donation.whaleAddress}</Whale>
-
-        <MatchWrapper>
-          Matching Info
-          <MatchAmount>Matching Amount: {donation.matchAmount}</MatchAmount>
-          <MatchPercent>Matching Percentage: {donation.matchPercent}</MatchPercent>
-          <MatchExpireAt>Matching Expires At: {donation.matchExpireAt}</MatchExpireAt>
-          <BountyPool>Bounty Pool: {donation.bountyPool}</BountyPool>
-        </MatchWrapper>
-
-        <UserDonationWrapper>
-          User Donations
-          {
-            donation.userDonations
-              .map((userDonation, index) =>
-                <UserDonation key={`user-donation-${index}`}>{userDonation}</UserDonation>)
-          }
-        </UserDonationWrapper>
-
-        <ChallengeWrapper>
-          Challenges
-          {
-            donation.challenges
-              .map((challenge, index) =>
-                <Challenge key={`challenge-${index}`}>{challenge}</Challenge>)
-          }
-        </ChallengeWrapper>
-
-        <ReportWrapper>
-          Reports
-          {
-            donation.reports
-              .map((report, index) =>
-                <Report key={`report-${index}`}>{report}</Report>)
-          }
-        </ReportWrapper>
+        {
+          (donation === null || donation === undefined)
+            ? <></>
+            : <>
+              <h1>
+                {`Donation Details of "${query.get('id')}"`}
+              </h1>
+      
+              <Id>ID: {donation.id}</Id>
+      
+              <Name>Name: {donation.name}</Name>
+      
+              <Description>Description: {donation.description}</Description>
+      
+              <Stage>Stage: {donation.stage}</Stage>
+      
+              <Organization>Organization: {donation.org}</Organization>
+      
+              <Whale>Whale: {donation.whale}</Whale>
+      
+              <MatchWrapper>
+                Matching Info
+                <MatchAmount>Matching Amount: {donation.whaleDonationTotalAmount}</MatchAmount>
+                <MatchPercent>Matching Percentage: {donation.matchPercentage}</MatchPercent>
+                <MatchExpireAt>Matching Expires At: {donation.expireAt}</MatchExpireAt>
+                <BountyPool>Bounty Pool: {donation.bounty}</BountyPool>
+              </MatchWrapper>
+      
+              {
+              //  P2
+              /* <UserDonationWrapper>
+                User Donations
+                {
+                  donation.userDonations
+                    .map((userDonation, index) =>
+                      <UserDonation key={`user-donation-${index}`}>{userDonation}</UserDonation>)
+                }
+              </UserDonationWrapper> */}
+      
+              {/* <ChallengeWrapper>
+                Challenges
+                {
+                  donation.challenges
+                    .map((challenge, index) =>
+                      <Challenge key={`challenge-${index}`}>{challenge}</Challenge>)
+                }
+              </ChallengeWrapper> */}
+      
+              {/* <ReportWrapper>
+                Reports
+                {
+                  donation.reports
+                    .map((report, index) =>
+                      <Report key={`report-${index}`}>{report}</Report>)
+                }
+              </ReportWrapper> */}            
+            </>
+        }
       </Content>
     </Container>
   );
