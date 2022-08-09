@@ -8,14 +8,16 @@ function Connect() {
   const { chainId, account, activateBrowserWallet, library } = useEthers();
   const { activateWalletConnect } = useWalletConnect(ALCHEMY_API);
 
+  console.log("chainId: ", chainId);
   return (
     <div>
-      {!!library && chainId !== 4 && (
+      {!!library && chainId !== 1337 && (
         <button
           onClick={async () => {
             try {
               await library.send("wallet_switchEthereumChain", [
-                { chainId: "0x4" },
+                // { chainId: "0x7A69" },
+                { chainId: "0x0539" },
               ]);
             } catch (error) {
               console.log(error);

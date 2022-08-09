@@ -54,20 +54,14 @@ const MenuLink = styled(Link)`
 //   height: 60px;
 // `;
 
-
 function Header() {
-
   // TODO(): fix styles. clean up unused code.
   return (
     <Container>
       <MenuContainer>
         Good Whale Hunting
-        <MenuLink to='/create-donation'>
-          Are you a Whale?
-        </MenuLink>
-        <MenuLink to='/my-donations'>
-          My Donations
-        </MenuLink>
+        <MenuLink to="/create-donation">Are you a Whale?</MenuLink>
+        <MenuLink to="/my-donations">My Donations</MenuLink>
       </MenuContainer>
     </Container>
   );

@@ -3,6 +3,7 @@
 //
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
+import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 
 async function main() {
@@ -14,12 +15,15 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  const Greeter = await ethers.getContractFactory("Greeter");
-  const greeter = await Greeter.deploy("Hello, Hardhat!");
+  const USDC = await ethers.getContractFactory("USDC");
+  const usdc = await USDC.deploy(BigNumber.from(10_000_000).mul(BigNumber.from(10).pow(18)));
+  await usdc.deployed();
+  console.log("usdc deployed to:", usdc.address);
 
-  await greeter.deployed();
-
-  console.log("Greeter deployed to:", greeter.address);
+  const DonationFactory = await ethers.getContractFactory("DonationFactory");
+  const donationFactory = await DonationFactory.deploy(usdc.address);
+  await donationFactory.deployed();
+  console.log("donationFactory deployed to:", donationFactory.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
