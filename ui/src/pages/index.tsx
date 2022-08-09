@@ -290,9 +290,9 @@ export default function Home() {
 
   return (
     <div style={{width: '100%'}}>
-    <HeaderContainer>
-      <Header />
-    </HeaderContainer>
+      <HeaderContainer>
+        <Header />
+      </HeaderContainer>
       <MainContainer>
         <HeroImage />
         <PageContainer>
