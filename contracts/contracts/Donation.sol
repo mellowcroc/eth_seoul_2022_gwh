@@ -43,6 +43,7 @@ contract Donation {
     address[] public challenges;
     Report[] public reports;
     bool public refundMatch;
+    uint256 public refundAmountAfterStopped;
 
     address factory;
 
@@ -125,25 +126,30 @@ contract Donation {
         }
     }
 
-    function calculateRefundAmount(uint256 initialAmount)
+    function calculateUserRefundAmount(uint256 initialAmount)
         internal
         view
         returns (uint256)
     {
-        uint256 ratio = initialAmount /
+        uint256 ratioPermil = (initialAmount * 1000) /
             (userDonationTotalAmount + whaleDonationTotalAmount);
-        uint256 balance = IERC20(token).balanceOf(address(this));
-        return balance * ratio;
+        return (refundAmountAfterStopped * ratioPermil) / 1000;
+    }
+
+    function calculateWhaleRefundAmount() internal view returns (uint256) {
+        uint256 ratioPermil = 1000 -
+            ((userDonationTotalAmount * 1000) /
+                (userDonationTotalAmount + whaleDonationTotalAmount));
+        return (refundAmountAfterStopped * ratioPermil) / 1000;
     }
 
     function refund() public {
         if (emissionStopped) {
             if (msg.sender == whale && !whaleRefunded) {
                 whaleRefunded = true;
-                IERC20(token).transferFrom(
-                    address(this),
+                IERC20(token).transfer(
                     msg.sender,
-                    calculateRefundAmount(whaleDonationTotalAmount)
+                    calculateWhaleRefundAmount()
                 );
             } else if (
                 userDonations[msg.sender] > 0 && !userRefunded[msg.sender]
@@ -151,7 +157,7 @@ contract Donation {
                 userRefunded[msg.sender] = true;
                 IERC20(token).transfer(
                     msg.sender,
-                    calculateRefundAmount(userDonations[msg.sender])
+                    calculateUserRefundAmount(userDonations[msg.sender])
                 );
             }
             return;
@@ -209,6 +215,7 @@ contract Donation {
             "recent challenge is not approved"
         );
         emissionStopped = true;
+        refundAmountAfterStopped = IERC20(token).balanceOf(address(this));
     }
 
     function min(uint256 a, uint256 b) internal pure returns (uint256) {

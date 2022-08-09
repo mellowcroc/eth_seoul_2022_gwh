@@ -59,16 +59,16 @@ describe("Donation", function () {
   });
   it("whale can refund unmatched donation", async function () {
     expect(await usdc.balanceOf(whale.address)).to.equal(0);
-    donation.connect(whale).refund();
+    await donation.connect(whale).refund();
     expect(await usdc.balanceOf(whale.address)).to.equal(
       convertTo18Decimals(8_500)
     );
   });
   it("org can claim donation", async function () {
     const balancesPerEpoch = [
-      0, 450, 900, 1350, 1800, 2250, 2700, 3150, 3600, 4050, 4500,
+      0, 450, 900, 1350, 1800, 2250, 2700, 3150, 3600, 4050,
     ];
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 9; i++) {
       await ethers.provider.send("evm_increaseTime", [3600 * 24 * 30]);
       await ethers.provider.send("evm_mine", []);
       expect(await usdc.balanceOf(org.address)).to.equal(
@@ -96,11 +96,56 @@ describe("Donation", function () {
 
     await challenge.connect(user2).vote(true);
 
-    await ethers.provider.send("evm_increaseTime", [14 * 60 * 60 * 24 + 1000]);
+    await ethers.provider.send("evm_increaseTime", [3600 * 24 * 14 + 1000]); // 14+ days
     await ethers.provider.send("evm_mine", []);
 
     await challenge.closeChallenge();
     await donation.stop();
+    expect(await donation.emissionStopped()).to.equal(true);
+    expect(await donation.refundAmountAfterStopped()).to.equal(
+      convertTo18Decimals(450)
+    );
+
+    await ethers.provider.send("evm_increaseTime", [3600 * 24 * 30]); // 30 days
+    await ethers.provider.send("evm_mine", []);
+
+    // org cannot withdraw
+    expect(await usdc.balanceOf(org.address)).to.equal(
+      convertTo18Decimals(4050)
+    );
+    await expect(donation.connect(org).withdraw()).to.be.revertedWith(
+      "cannot withdraw if stopped"
+    );
+    expect(await usdc.balanceOf(org.address)).to.equal(
+      convertTo18Decimals(4050)
+    );
+    expect(await usdc.balanceOf(donation.address)).to.equal(
+      convertTo18Decimals(450)
+    );
+  });
+
+  it("users can get refund from stopped donation", async function () {
+    expect(await usdc.balanceOf(whale.address)).to.equal(
+      convertTo18Decimals(8_500)
+    );
+    expect(await usdc.balanceOf(user1.address)).to.equal(0);
+    expect(await usdc.balanceOf(user2.address)).to.equal(0);
+    expect(await usdc.balanceOf(donation.address)).to.equal(
+      convertTo18Decimals(450)
+    );
+    await donation.connect(whale).refund();
+    await donation.connect(user1).refund();
+    await donation.connect(user2).refund();
+    expect(await usdc.balanceOf(whale.address)).to.equal(
+      BigNumber.from(86503).mul(BigNumber.from(10).pow(17))
+    );
+    expect(await usdc.balanceOf(user1.address)).to.equal(
+      BigNumber.from(999).mul(BigNumber.from(10).pow(17))
+    );
+    expect(await usdc.balanceOf(user2.address)).to.equal(
+      BigNumber.from(1_998).mul(BigNumber.from(10).pow(17))
+    );
+    expect(await usdc.balanceOf(donation.address)).to.equal(0);
   });
 });
 
