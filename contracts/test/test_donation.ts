@@ -24,8 +24,12 @@ describe("Donation", function () {
   it("Should create new donation", async function () {
     const USDC = await ethers.getContractFactory("USDC");
     usdc = await USDC.deploy(
-      BigNumber.from(13_500).mul(BigNumber.from(10).pow(18))
+      BigNumber.from(13_550).mul(BigNumber.from(10).pow(18))
     );
+    await usdc
+      .connect(whale)
+      .transfer(challenger.address, convertTo18Decimals(50));
+
     const DonationFactory = await ethers.getContractFactory("DonationFactory");
     const donationFactory = await DonationFactory.deploy(usdc.address);
     await usdc.approve(donationFactory.address, convertTo18Decimals(10_500));
@@ -83,6 +87,9 @@ describe("Donation", function () {
   });
   // TODO: Add test for opening challenges and stopping donation emission
   it("challenger can open challenges", async function () {
+    await usdc
+      .connect(challenger)
+      .approve(await donation.getDAOAddress(), convertTo18Decimals(50));
     await donation
       .connect(challenger)
       .openChallenge("Here comes a new challenge");

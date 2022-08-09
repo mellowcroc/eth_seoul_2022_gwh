@@ -6,6 +6,7 @@ import {
   Challenge__factory,
   Donation,
   Donation__factory,
+  USDC,
 } from "../typechain";
 
 enum ChallengeStatus {
@@ -24,13 +25,14 @@ describe("Challenger", function () {
   let org: SignerWithAddress;
   let challenge: Challenge;
   let donation: Donation;
+  let usdc: USDC;
 
   before(async () => {
     [challenger, addr1, addr2, addr3, addr4, whale, org] =
       await ethers.getSigners();
 
     const USDC = await ethers.getContractFactory("USDC");
-    const usdc = await USDC.deploy(
+    usdc = await USDC.deploy(
       ethers.BigNumber.from(30_000).mul(ethers.BigNumber.from(10).pow(18))
     );
 
@@ -62,6 +64,9 @@ describe("Challenger", function () {
   });
 
   it("Should deploy and initialize challenge", async function () {
+    await usdc
+      .connect(challenger)
+      .approve(await donation.getDAOAddress(), convertTo18Decimals(50));
     await donation.connect(challenger).openChallenge("Simple vote");
     const challengeAddr = await donation.getRecentChallenge();
     challenge = Challenge__factory.connect(challengeAddr, challenger);
