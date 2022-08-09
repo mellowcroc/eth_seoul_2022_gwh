@@ -15,6 +15,10 @@ contract DonationFactory {
         token = token_;
     }
 
+    function numDonations() public view returns (uint256) {
+      return allDonations.length;
+    }
+
     function reserveChallengeCollateral(address sender) public {
         IERC20(token).transferFrom(sender, address(this), CHALLENGE_COLLATERAL);
     }
