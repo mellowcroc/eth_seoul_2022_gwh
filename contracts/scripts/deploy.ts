@@ -1,6 +1,8 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ethers } from "hardhat";
 import {
+  Challenge,
+  Challenge__factory,
   Donation,
   DonationFactory,
   Donation__factory,
@@ -21,8 +23,10 @@ let usdc: USDC;
 let donationFactory: DonationFactory;
 let funDonation: Donation;
 let emiDonation: Donation;
-let clsDonation: Donation;
+let chaDonation: Donation;
+let ongoingChallenge: Challenge;
 let stpDonation: Donation;
+let approvedChallenge: Challenge;
 let finDonation: Donation;
 
 const whaleFunding = 5000;
@@ -55,7 +59,7 @@ async function distributeTokens() {
   console.log("Distributing tokens...");
   const whaleAmount = convertTo18Decimals((whaleFunding + cbounty) * 5);
   const userAmount = convertTo18Decimals(userDonating * 5);
-  const challengerAmount = convertTo18Decimals(ccollateral);
+  const challengerAmount = convertTo18Decimals(ccollateral * 2);
 
   await usdc.transfer(whale.address, whaleAmount);
   console.log(`Distribute ${whale.address} USDC to ${whaleAmount}`);
@@ -68,14 +72,6 @@ async function distributeTokens() {
   }
   console.log("===========================");
 }
-
-async function generateFinishedStateDonation() {}
-
-async function generateEmissionStateDonation() {}
-
-async function generateChallengingStateDonation() {}
-
-async function generateStoppedStateDonation() {}
 
 async function generateFundingStateDonation() {
   await usdc
@@ -96,16 +92,97 @@ async function generateFundingStateDonation() {
   const donationAddress = await donationFactory.allDonations(
     (await donationFactory.donationCount()).toNumber() - 1
   );
-  funDonation = Donation__factory.connect(donationAddress, whale);
 
-  console.log(`Funding State Donation: ${funDonation.address}`);
+  return Donation__factory.connect(donationAddress, whale);
+}
+
+async function generateEmissionStateDonation() {
+  const donation = await generateFundingStateDonation();
+
+  const donationAmount = convertTo18Decimals(userDonating);
+  for (const u of [user1, user2, user3]) {
+    await usdc.connect(u).approve(donation.address, donationAmount);
+    await donation.connect(u).donate(donationAmount);
+  }
+
+  await ethers.provider.send("evm_increaseTime", [3600 * 24 * 30]);
+  await ethers.provider.send("evm_mine", []);
+  return donation;
+}
+
+async function generateFinishedStateDonation() {
+  const donation = await generateFundingStateDonation();
+
+  const donationAmount = convertTo18Decimals(userDonating);
+  for (const u of [user1, user2, user3]) {
+    await usdc.connect(u).approve(donation.address, donationAmount);
+    await donation.connect(u).donate(donationAmount);
+  }
+
+  await ethers.provider.send("evm_increaseTime", [3600 * 24 * 360]);
+  await ethers.provider.send("evm_mine", []);
+
+  console.log(`Finished State Donation: ${donation.address}`);
+  console.log("===========================");
+  return donation;
+}
+
+async function generateChallengingStateDonation(): Promise<
+  [Donation, Challenge]
+> {
+  const donation = await generateEmissionStateDonation();
+
+  await ethers.provider.send("evm_increaseTime", [3600 * 24 * 60]);
+  await ethers.provider.send("evm_mine", []);
+
+  await usdc
+    .connect(challenger)
+    .approve(await donation.getDAOAddress(), convertTo18Decimals(ccollateral));
+  await donation.connect(challenger).openChallenge("Simple challenge");
+  const challengeAddr = await donation.getRecentChallenge();
+  const challenge = Challenge__factory.connect(challengeAddr, challenger);
+
+  return [donation, challenge];
+}
+
+async function generateStoppedStateDonation(): Promise<[Donation, Challenge]> {
+  const [donation, challenge] = await generateChallengingStateDonation();
+
+  await challenge.connect(user1).vote(true);
+  await challenge.connect(user2).vote(true);
+  await challenge.connect(whale).vote(true);
+
+  await ethers.provider.send("evm_increaseTime", [3600 * 24 * 15]);
+  await ethers.provider.send("evm_mine", []);
+
+  await challenge.connect(admin).closeChallenge();
+  await donation.connect(admin).stop();
+
+  return [donation, challenge];
 }
 
 async function main() {
   await deployContract();
   await distributeTokens();
-  await generateFinishedStateDonation();
-  await generateFundingStateDonation();
+  finDonation = await generateFinishedStateDonation();
+
+  emiDonation = await generateEmissionStateDonation();
+  console.log(`Emission State Donation: ${emiDonation.address}`);
+  console.log("===========================");
+
+  [stpDonation, approvedChallenge] = await generateStoppedStateDonation();
+  console.log(`Stopped State Donation: ${stpDonation.address}`);
+  console.log(`Approved Challenge: ${approvedChallenge.address}`);
+  console.log("===========================");
+
+  [chaDonation, ongoingChallenge] = await generateChallengingStateDonation();
+  console.log(`Challenge State Donation: ${chaDonation.address}`);
+  console.log(`Ongoing Challenge: ${ongoingChallenge.address}`);
+  console.log("===========================");
+
+  funDonation = await generateFundingStateDonation();
+  console.log(`Funding State Donation: ${funDonation.address}`);
+  console.log("===========================");
 }
 
 // We recommend this pattern to be able to use async/await everywhere
