@@ -14,27 +14,28 @@ describe("Donation", function () {
   let org: SignerWithAddress;
   let user1: SignerWithAddress;
   let user2: SignerWithAddress;
+  let challenger: SignerWithAddress;
   let usdc: USDC;
   let donationAddress: string;
   let donation: Donation;
   before(async () => {
-    [whale, org, user1, user2] = await ethers.getSigners();
+    [whale, org, user1, user2, challenger] = await ethers.getSigners();
   });
   it("Should create new donation", async function () {
     const USDC = await ethers.getContractFactory("USDC");
     usdc = await USDC.deploy(
-      BigNumber.from(13_000).mul(BigNumber.from(10).pow(18))
+      BigNumber.from(13_500).mul(BigNumber.from(10).pow(18))
     );
     const DonationFactory = await ethers.getContractFactory("DonationFactory");
     const donationFactory = await DonationFactory.deploy(usdc.address);
-    await usdc.approve(donationFactory.address, convertTo18Decimals(10_000));
+    await usdc.approve(donationFactory.address, convertTo18Decimals(10_500));
     await donationFactory.createWhaleDonation(
       "Save The Whales",
       "Effort to halt commercial whaling",
       org.address,
       convertTo18Decimals(10_000),
       50,
-      convertTo18Decimals(500),
+      convertTo18Decimals(500), // bounty
       3600 * 24 * 30 // 30 days
     );
     donationAddress = await donationFactory.allDonations(0);
@@ -82,7 +83,9 @@ describe("Donation", function () {
   });
   // TODO: Add test for opening challenges and stopping donation emission
   it("challenger can open challenges", async function () {
-    await donation.openChallenge("Here comes a new challenge");
+    await donation
+      .connect(challenger)
+      .openChallenge("Here comes a new challenge");
 
     await expect(
       donation.openChallenge("Duplicated challenge")
@@ -120,7 +123,7 @@ describe("Donation", function () {
       convertTo18Decimals(4050)
     );
     expect(await usdc.balanceOf(donation.address)).to.equal(
-      convertTo18Decimals(450)
+      convertTo18Decimals(450 + 500 /* bounty */)
     );
   });
 
@@ -131,7 +134,7 @@ describe("Donation", function () {
     expect(await usdc.balanceOf(user1.address)).to.equal(0);
     expect(await usdc.balanceOf(user2.address)).to.equal(0);
     expect(await usdc.balanceOf(donation.address)).to.equal(
-      convertTo18Decimals(450)
+      convertTo18Decimals(450 + 500 /* bounty */)
     );
     await donation.connect(whale).refund();
     await donation.connect(user1).refund();
@@ -145,7 +148,23 @@ describe("Donation", function () {
     expect(await usdc.balanceOf(user2.address)).to.equal(
       BigNumber.from(1_998).mul(BigNumber.from(10).pow(17))
     );
+    expect(await usdc.balanceOf(donation.address)).to.equal(
+      convertTo18Decimals(500 /* bounty */)
+    );
+  });
+
+  it("challenger can claim bounty", async function () {
+    expect(await usdc.balanceOf(donation.address)).to.equal(
+      convertTo18Decimals(500 /* bounty */)
+    );
+    await donation.connect(challenger).claimBounty();
     expect(await usdc.balanceOf(donation.address)).to.equal(0);
+    expect(await usdc.balanceOf(challenger.address)).to.equal(
+      convertTo18Decimals(500)
+    );
+    expect(donation.connect(challenger).claimBounty()).to.be.revertedWith(
+      "already claimed"
+    );
   });
 });
 

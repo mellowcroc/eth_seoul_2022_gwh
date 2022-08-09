@@ -34,10 +34,9 @@ describe("Challenger", function () {
       ethers.BigNumber.from(30_000).mul(ethers.BigNumber.from(10).pow(18))
     );
 
-    await usdc.transfer(whale.address, convertTo18Decimals(12_000));
     const DonationFactory = await ethers.getContractFactory("DonationFactory");
     const donationFactory = await DonationFactory.deploy(usdc.address);
-    await usdc.approve(donationFactory.address, convertTo18Decimals(10_000));
+    await usdc.approve(donationFactory.address, convertTo18Decimals(10_500));
     await donationFactory.createWhaleDonation(
       "Save The Whales",
       "Effort to halt commercial whaling",
@@ -123,7 +122,7 @@ describe("Challenger", function () {
 
   it("Users couldnt close challenge early", async function () {
     await expect(challenge.closeChallenge()).to.revertedWith(
-      "Vote perioed has not ended."
+      "Vote period has not ended."
     );
   });
 
@@ -137,7 +136,7 @@ describe("Challenger", function () {
     );
 
     await expect(challengeAsUser4.vote(true)).to.revertedWith(
-      "Vote perioed has ended."
+      "Vote period has ended."
     );
   });
 

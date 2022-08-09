@@ -88,7 +88,7 @@ contract Challenge {
     }
 
     function vote(bool yn) public {
-        require(block.timestamp < votableUntil, "Vote perioed has ended.");
+        require(block.timestamp < votableUntil, "Vote period has ended.");
         require(
             Donation(donation).isDonatedAddr(msg.sender),
             "Only donated user can vote."
@@ -103,7 +103,7 @@ contract Challenge {
     }
 
     function closeChallenge() public {
-        require(block.timestamp > votableUntil, "Vote perioed has not ended.");
+        require(block.timestamp > votableUntil, "Vote period has not ended.");
         require(status == ChallengeStatus.Ongoing, "This challenge has ended.");
 
         status = ChallengeStatus.Disapproved;

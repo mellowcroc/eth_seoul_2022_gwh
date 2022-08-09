@@ -30,8 +30,12 @@ contract DonationFactory {
         assembly {
             donation := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
-        IERC20(token).approve(donation, whaleDonationMax_);
-        IERC20(token).transferFrom(msg.sender, donation, whaleDonationMax_);
+        IERC20(token).approve(donation, whaleDonationMax_ + bounty_);
+        IERC20(token).transferFrom(
+            msg.sender,
+            donation,
+            whaleDonationMax_ + bounty_
+        );
         Donation(donation).initialize(
             token,
             name_,

@@ -44,6 +44,7 @@ contract Donation {
     Report[] public reports;
     bool public refundMatch;
     uint256 public refundAmountAfterStopped;
+    bool public bountyClaimed;
 
     address factory;
 
@@ -215,7 +216,20 @@ contract Donation {
             "recent challenge is not approved"
         );
         emissionStopped = true;
-        refundAmountAfterStopped = IERC20(token).balanceOf(address(this));
+        refundAmountAfterStopped =
+            IERC20(token).balanceOf(address(this)) -
+            bounty;
+    }
+
+    function claimBounty() public {
+        require(emissionStopped, "can only claim if emission is stopped");
+        require(!bountyClaimed, "already claimed");
+        require(
+            msg.sender == Challenge(getRecentChallenge()).getChallenger(),
+            "only challenger can claim bounty"
+        );
+        bountyClaimed = true;
+        IERC20(token).transfer(msg.sender, bounty);
     }
 
     function min(uint256 a, uint256 b) internal pure returns (uint256) {
