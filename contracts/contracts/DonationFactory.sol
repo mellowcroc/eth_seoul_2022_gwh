@@ -18,7 +18,7 @@ contract DonationFactory {
     }
 
     function numDonations() public view returns (uint256) {
-      return allDonations.length;
+        return allDonations.length;
     }
 
     function reserveChallengeCollateral(address sender) public {
