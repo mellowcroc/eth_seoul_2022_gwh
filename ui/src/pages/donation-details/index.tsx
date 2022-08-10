@@ -1,9 +1,9 @@
-import { useEthers } from '@usedapp/core';
-import { useState } from 'react';
-import styled from 'styled-components';
-import Header from '../../components/Header';
-import { useDonation } from '../../hooks/useDonation';
-import { useQuery } from '../../hooks/useQuery';
+import { useEthers } from "@usedapp/core";
+import { useState } from "react";
+import styled from "styled-components";
+import Header from "../../components/Header";
+import { useDonation } from "../../hooks/useDonation";
+import { useQuery } from "../../hooks/useQuery";
 
 const Container = styled.div`
   display: flex;
@@ -64,10 +64,12 @@ const Report = styled.div``;
 
 export default function DonationDetails() {
   const query = useQuery();
-  const donationId = parseInt(query.get('id') || '');
+  const donationId = parseInt(query.get("id") || "");
   const { account } = useEthers();
-  const { donations } = useDonation('', account); // TODO
-  const donation = isNaN(donationId) ? null : donations.find((x) => x.id === donationId);
+  const { donations } = useDonation("", ""); // TODO
+  const donation = isNaN(donationId)
+    ? null
+    : donations.find((x) => x.id === donationId);
 
   return (
     <Container>
@@ -75,35 +77,39 @@ export default function DonationDetails() {
         <Header />
       </HeaderContainer>
       <Content>
-        {
-          (donation === null || donation === undefined)
-            ? <></>
-            : <>
-              <h1>
-                {`Donation Details of "${query.get('id')}"`}
-              </h1>
-      
-              <Id>ID: {donation.id}</Id>
-      
-              <Name>Name: {donation.name}</Name>
-      
-              <Description>Description: {donation.description}</Description>
-      
-              <Stage>Stage: {donation.stage}</Stage>
-      
-              <Organization>Organization: {donation.org}</Organization>
-      
-              <Whale>Whale: {donation.whale}</Whale>
-      
-              <MatchWrapper>
-                Matching Info
-                <MatchAmount>Matching Amount: {donation.whaleDonationTotalAmount}</MatchAmount>
-                <MatchPercent>Matching Percentage: {donation.matchPercentage}</MatchPercent>
-                <MatchExpireAt>Matching Expires At: {donation.expireAt}</MatchExpireAt>
-                <BountyPool>Bounty Pool: {donation.bounty}</BountyPool>
-              </MatchWrapper>
-      
-              {
+        {donation === null || donation === undefined ? (
+          <></>
+        ) : (
+          <>
+            <h1>{`Donation Details of "${query.get("id")}"`}</h1>
+
+            <Id>ID: {donation.id}</Id>
+
+            <Name>Name: {donation.name}</Name>
+
+            <Description>Description: {donation.description}</Description>
+
+            <Stage>Stage: {donation.stage}</Stage>
+
+            <Organization>Organization: {donation.org}</Organization>
+
+            <Whale>Whale: {donation.whale}</Whale>
+
+            <MatchWrapper>
+              Matching Info
+              <MatchAmount>
+                Matching Amount: {donation.whaleDonationTotalAmount}
+              </MatchAmount>
+              <MatchPercent>
+                Matching Percentage: {donation.matchPercentage}
+              </MatchPercent>
+              <MatchExpireAt>
+                Matching Expires At: {donation.expireAt}
+              </MatchExpireAt>
+              <BountyPool>Bounty Pool: {donation.bounty}</BountyPool>
+            </MatchWrapper>
+
+            {
               //  P2
               /* <UserDonationWrapper>
                 User Donations
@@ -112,9 +118,10 @@ export default function DonationDetails() {
                     .map((userDonation, index) =>
                       <UserDonation key={`user-donation-${index}`}>{userDonation}</UserDonation>)
                 }
-              </UserDonationWrapper> */}
-      
-              {/* <ChallengeWrapper>
+              </UserDonationWrapper> */
+            }
+
+            {/* <ChallengeWrapper>
                 Challenges
                 {
                   donation.challenges
@@ -122,17 +129,17 @@ export default function DonationDetails() {
                       <Challenge key={`challenge-${index}`}>{challenge}</Challenge>)
                 }
               </ChallengeWrapper> */}
-      
-              {/* <ReportWrapper>
+
+            {/* <ReportWrapper>
                 Reports
                 {
                   donation.reports
                     .map((report, index) =>
                       <Report key={`report-${index}`}>{report}</Report>)
                 }
-              </ReportWrapper> */}            
-            </>
-        }
+              </ReportWrapper> */}
+          </>
+        )}
       </Content>
     </Container>
   );
