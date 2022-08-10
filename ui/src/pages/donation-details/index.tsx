@@ -66,13 +66,11 @@ const Report = styled.div``;
 
 export default function DonationDetails() {
   const query = useQuery();
-  const donationId = parseInt(query.get("id") || "");
+  const donationAddress = query.get("address") || "";
+  console.log("donationAddress: ", donationAddress);
   const { account } = useEthers();
-  const { donations } = useDonation(DONATION_FACTORY, ""); // TODO
-  console.log("donations: ", donations);
-  const donation = isNaN(donationId)
-    ? null
-    : donations.find((x) => x.id === donationId);
+  const { donation } = useDonation(donationAddress, ""); // TODO
+  console.log("donation: ", donation);
 
   return (
     <Container>
@@ -84,9 +82,9 @@ export default function DonationDetails() {
           <></>
         ) : (
           <>
-            <h1>{`Donation Details of "${query.get("id")}"`}</h1>
+            <h1>{`Donation Details`}</h1>
 
-            <Id>ID: {donation.id}</Id>
+            <Id>Contract address: {donation.contractAddress}</Id>
 
             <Name>Name: {donation.name}</Name>
 
@@ -101,15 +99,19 @@ export default function DonationDetails() {
             <MatchWrapper>
               Matching Info
               <MatchAmount>
-                Matching Amount: {donation.whaleDonationTotalAmount}
+                Matching Amount:{" "}
+                {utils.formatUnits(donation.whaleDonationTotalAmount)}
               </MatchAmount>
               <MatchPercent>
                 Matching Percentage: {donation.matchPercentage}
               </MatchPercent>
               <MatchExpireAt>
-                Matching Expires At: {donation.expireAt}
+                Matching Expires At:{" "}
+                {new Date(donation.expireAt * 1000).toLocaleString()}
               </MatchExpireAt>
-              <BountyPool>Bounty Pool: {donation.bounty}</BountyPool>
+              <BountyPool>
+                Bounty Pool: {utils.formatUnits(donation.bounty)} USDC
+              </BountyPool>
             </MatchWrapper>
 
             {
