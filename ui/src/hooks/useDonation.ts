@@ -37,7 +37,9 @@ export const useDonation = (donationAddress: string, walletAddress: string) => {
     ) as Donation;
     const donationDataArr = await _donation.getDonationData();
     const myDonationAmount = myAddress
-      ? (await _donation.userDonations(myAddress)).toNumber()
+      ? Number(
+          (await _donation.userDonations(myAddress)).toBigInt() / BigInt(10e18)
+        )
       : 0;
     const donationData: DonationInterface = convertToDonationInterface(
       donationAddress,

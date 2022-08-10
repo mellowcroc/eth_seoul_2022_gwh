@@ -116,7 +116,9 @@ export const useDonations = (
       ) as Donation;
       const donationDataArr = await donation.getDonationData();
       const myDonationAmount = myAddress
-        ? (await donation.userDonations(myAddress)).toNumber()
+        ? Number(
+            (await donation.userDonations(myAddress)).toBigInt() / BigInt(10e18)
+          )
         : 0;
       const donationData: DonationInterface = convertToDonationInterface(
         donationAddress,
