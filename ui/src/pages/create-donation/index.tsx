@@ -79,7 +79,6 @@ export default function CreateDonation() {
   const [bountyPool, setBountyPool] = useState(500);
   const [matchPerc, setMatchPerc] = useState(50);
   const [matchExpireAt, setMatchExpireAt] = useState(3600);
-  const { donations, myDonations } = useDonation(DONATION_FACTORY, "");
 
   const signer = useMemo(() => library?.getSigner(), [library]);
   const factory = useMemo<DonationFactory | undefined>(
