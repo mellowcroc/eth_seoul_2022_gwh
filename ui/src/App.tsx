@@ -19,8 +19,8 @@ function App() {
   return (
     <div className="App">
       <Header className="App-header">
-        {chainId !== 80001 && <Connect />}
-        {chainId === 80001 && (
+        {chainId !== 1337 && <Connect />}
+        {chainId === 1337 && (
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/my-donations" element={<MyDonations />} />
@@ -28,6 +28,15 @@ function App() {
             <Route path="/donation-details" element={<DonationDetails />} />
           </Routes>
         )}
+        {/* {chainId !== 80001 && <Connect />}
+        {chainId === 80001 && (
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/my-donations" element={<MyDonations />} />
+            <Route path="/create-donation" element={<CreateDonation />} />
+            <Route path="/donation-details" element={<DonationDetails />} />
+          </Routes>
+        )} */}
       </Header>
     </div>
   );

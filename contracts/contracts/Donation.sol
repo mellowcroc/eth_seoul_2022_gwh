@@ -12,6 +12,34 @@ contract Donation {
         uint256 timestamp;
     }
 
+    struct DonationData {
+        address token;
+        uint256 id;
+        string name;
+        string description;
+        string stage;
+        address org;
+        address whale;
+        bool whaleRefunded;
+        uint256 whaleDonationMax;
+        uint256 whaleDonationTotalAmount;
+        uint256 bounty;
+        uint256 matchPercentage;
+        uint256 withdrawnAmount;
+        uint256 createdAt;
+        uint256 expireAt;
+        uint256 emissionDuration;
+        uint256 emissionRate;
+        bool emissionStopped;
+        uint256 donatedUsers;
+        uint256 userDonationTotalAmount;
+        uint256 challengesLength;
+        uint256 reportsLength;
+        bool refundMatch;
+        uint256 refundAmountAfterStopped;
+        bool bountyClaimed;
+    }
+
     event Donated(
         address indexed token0,
         address indexed token1,
@@ -80,6 +108,37 @@ contract Donation {
         createdAt = block.timestamp;
         expireAt = createdAt + duration_;
         donatedUsers = 0;
+    }
+
+    function getDonationData() public view returns (DonationData memory) {
+        return
+            DonationData({
+                token: token,
+                id: id,
+                name: name,
+                description: description,
+                stage: getStage(),
+                org: org,
+                whale: whale,
+                whaleRefunded: whaleRefunded,
+                whaleDonationMax: whaleDonationMax,
+                whaleDonationTotalAmount: whaleDonationTotalAmount,
+                bounty: bounty,
+                matchPercentage: matchPercentage,
+                withdrawnAmount: withdrawnAmount,
+                createdAt: createdAt,
+                expireAt: expireAt,
+                emissionDuration: emissionDuration,
+                emissionRate: emissionRate,
+                emissionStopped: emissionStopped,
+                donatedUsers: donatedUsers,
+                userDonationTotalAmount: userDonationTotalAmount,
+                challengesLength: challenges.length,
+                reportsLength: reports.length,
+                refundMatch: refundMatch,
+                refundAmountAfterStopped: refundAmountAfterStopped,
+                bountyClaimed: bountyClaimed
+            });
     }
 
     function donate(uint256 amount) public {
@@ -176,6 +235,18 @@ contract Donation {
                 );
             }
         }
+    }
+
+    function getStage() public view returns (string memory) {
+        if (emissionStopped) {
+            return "Stopped";
+        }
+        if (block.timestamp < expireAt) {
+            return "Funding";
+        } else if (block.timestamp < expireAt + emissionDuration) {
+            return "Emitting";
+        }
+        return "Finished";
     }
 
     function getDAOAddress() public view returns (address) {
