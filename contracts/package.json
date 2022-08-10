@@ -48,6 +48,7 @@
   },
   "scripts": {
     "test": "hardhat test",
+    "deployHardhat": "hardhat run ./scripts/deploy.ts --network hardhat",
     "build": "hardhat compile && tsc",
     "hardhat": "hardhat",
     "prettier:solidity": "./node_modules/.bin/prettier --write contracts/**/*.sol"
