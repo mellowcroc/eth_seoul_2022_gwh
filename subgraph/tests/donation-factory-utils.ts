@@ -1,4 +1,5 @@
 import { newMockEvent } from "matchstick-as";
+import { log } from "matchstick-as/assembly/log";
 import { ethereum, Address, BigInt } from "@graphprotocol/graph-ts";
 import {
   DonationCreated,
