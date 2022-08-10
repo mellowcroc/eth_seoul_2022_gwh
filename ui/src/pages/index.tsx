@@ -6,7 +6,7 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Header from "../components/Header";
-import { useDonation } from "../hooks/useDonation";
+import { useDonations } from "../hooks/useDonations";
 import { DONATION_FACTORY } from "../contracts";
 
 const HeaderContainer = styled.div`
@@ -129,7 +129,7 @@ const DonationLink = styled(Link)`
 `;
 
 interface DonationPreview {
-  id: number;
+  address: string;
   name: string;
   description: string;
   whaleAddress: string;
@@ -151,7 +151,7 @@ class DonationSlideItem extends Component<ISlideItemProps> {
             <div>{donation.description}</div>
             <div>Org: {donation.orgAddress}</div>
             <div>Whale: {donation.whaleAddress}</div>
-            <DonationLink to={`/donation-details?id=${donation.id}`}>
+            <DonationLink to={`/donation-details?address=${donation.address}`}>
               See details
             </DonationLink>
           </DonationInner>
@@ -176,7 +176,7 @@ export default function Home() {
     // speed: 500
   };
 
-  const { donations, myDonations } = useDonation(DONATION_FACTORY, "");
+  const { donations, myDonations } = useDonations(DONATION_FACTORY, "");
   const fundingDonations = [];
   const emittingDonations = [];
   const finishedDonations = [];
@@ -187,7 +187,7 @@ export default function Home() {
     if (donations[i].stage === "Funding") {
       console.log("inside funding");
       fundingDonations.push({
-        id: donations[i].id,
+        address: donations[i].contractAddress,
         name: donations[i].name,
         description: donations[i].description,
         whaleAddress: donations[i].whale,
@@ -195,7 +195,7 @@ export default function Home() {
       });
     } else if (donations[i].stage === "Emitting") {
       emittingDonations.push({
-        id: donations[i].id,
+        address: donations[i].contractAddress,
         name: donations[i].name,
         description: donations[i].description,
         whaleAddress: donations[i].whale,
@@ -203,7 +203,7 @@ export default function Home() {
       });
     } else if (donations[i].stage === "Finished") {
       finishedDonations.push({
-        id: donations[i].id,
+        address: donations[i].contractAddress,
         name: donations[i].name,
         description: donations[i].description,
         whaleAddress: donations[i].whale,
