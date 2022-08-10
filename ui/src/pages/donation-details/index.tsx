@@ -1,9 +1,11 @@
 import { useEthers } from "@usedapp/core";
 import { useState } from "react";
+import { utils } from "ethers";
 import styled from "styled-components";
 import Header from "../../components/Header";
 import { useDonation } from "../../hooks/useDonation";
 import { useQuery } from "../../hooks/useQuery";
+import { DONATION_FACTORY } from "../../contracts";
 
 const Container = styled.div`
   display: flex;
@@ -66,7 +68,8 @@ export default function DonationDetails() {
   const query = useQuery();
   const donationId = parseInt(query.get("id") || "");
   const { account } = useEthers();
-  const { donations } = useDonation("", ""); // TODO
+  const { donations } = useDonation(DONATION_FACTORY, ""); // TODO
+  console.log("donations: ", donations);
   const donation = isNaN(donationId)
     ? null
     : donations.find((x) => x.id === donationId);

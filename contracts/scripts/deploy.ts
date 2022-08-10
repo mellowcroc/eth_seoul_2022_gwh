@@ -61,26 +61,30 @@ async function distributeTokens() {
   const userAmount = convertTo18Decimals(userDonating * 5);
   const challengerAmount = convertTo18Decimals(ccollateral * 2);
 
-  await usdc.transfer(whale.address, whaleAmount);
+  const transferTx1 = await usdc.transfer(whale.address, whaleAmount);
+  await transferTx1.wait(1);
   console.log(`Distribute ${whale.address} USDC to ${whaleAmount}`);
-  await usdc.transfer(challenger.address, challengerAmount);
+  const transferTx2 = await usdc.transfer(challenger.address, challengerAmount);
+  await transferTx2.wait(1);
   console.log(`Distribute ${challenger.address} USDC to ${challengerAmount}`);
 
   for (const u of [user1, user2, user3]) {
-    await usdc.transfer(u.address, userAmount);
+    const transferTx = await usdc.transfer(u.address, userAmount);
+    await transferTx.wait(1);
     console.log(`Distribute ${u.address} USDC to ${userAmount}`);
   }
   console.log("===========================");
 }
 
 async function generateFundingStateDonation() {
-  await usdc
+  const approveTx = await usdc
     .connect(whale)
     .approve(
       donationFactory.address,
       convertTo18Decimals(whaleFunding + cbounty)
     );
-  await donationFactory.connect(whale).createWhaleDonation(
+  await approveTx.wait(1);
+  const createTx = await donationFactory.connect(whale).createWhaleDonation(
     "Funding State Donation",
     "Funding State Donation Desc",
     org.address,
@@ -89,6 +93,7 @@ async function generateFundingStateDonation() {
     convertTo18Decimals(cbounty), // bounty
     3600 * 24 * 30 // 30 days
   );
+  await createTx.wait(1);
   const donationAddress = await donationFactory.allDonations(
     (await donationFactory.donationCount()).toNumber() - 1
   );
@@ -101,8 +106,12 @@ async function generateEmissionStateDonation() {
 
   const donationAmount = convertTo18Decimals(userDonating);
   for (const u of [user1, user2, user3]) {
-    await usdc.connect(u).approve(donation.address, donationAmount);
-    await donation.connect(u).donate(donationAmount);
+    const approveTx = await usdc
+      .connect(u)
+      .approve(donation.address, donationAmount);
+    await approveTx.wait(1);
+    const donateTx = await donation.connect(u).donate(donationAmount);
+    await donateTx.wait(1);
   }
 
   await ethers.provider.send("evm_increaseTime", [3600 * 24 * 30]);
@@ -115,8 +124,12 @@ async function generateFinishedStateDonation() {
 
   const donationAmount = convertTo18Decimals(userDonating);
   for (const u of [user1, user2, user3]) {
-    await usdc.connect(u).approve(donation.address, donationAmount);
-    await donation.connect(u).donate(donationAmount);
+    const approveTx = await usdc
+      .connect(u)
+      .approve(donation.address, donationAmount);
+    await approveTx.wait(1);
+    const donateTx = await donation.connect(u).donate(donationAmount);
+    await donateTx.wait(1);
   }
 
   await ethers.provider.send("evm_increaseTime", [3600 * 24 * 360]);
@@ -135,10 +148,14 @@ async function generateChallengingStateDonation(): Promise<
   await ethers.provider.send("evm_increaseTime", [3600 * 24 * 60]);
   await ethers.provider.send("evm_mine", []);
 
-  await usdc
+  const approveTx = await usdc
     .connect(challenger)
     .approve(await donation.getDAOAddress(), convertTo18Decimals(ccollateral));
-  await donation.connect(challenger).openChallenge("Simple challenge");
+  await approveTx.wait(1);
+  const challengeTx = await donation
+    .connect(challenger)
+    .openChallenge("Simple challenge");
+  await challengeTx.wait(1);
   const challengeAddr = await donation.getRecentChallenge();
   const challenge = Challenge__factory.connect(challengeAddr, challenger);
 
@@ -148,15 +165,20 @@ async function generateChallengingStateDonation(): Promise<
 async function generateStoppedStateDonation(): Promise<[Donation, Challenge]> {
   const [donation, challenge] = await generateChallengingStateDonation();
 
-  await challenge.connect(user1).vote(true);
-  await challenge.connect(user2).vote(true);
-  await challenge.connect(whale).vote(true);
+  const voteTx1 = await challenge.connect(user1).vote(true);
+  await voteTx1.wait(1);
+  const voteTx2 = await challenge.connect(user2).vote(true);
+  await voteTx2.wait(1);
+  const voteTx3 = await challenge.connect(whale).vote(true);
+  await voteTx3.wait(1);
 
   await ethers.provider.send("evm_increaseTime", [3600 * 24 * 15]);
   await ethers.provider.send("evm_mine", []);
 
-  await challenge.connect(admin).closeChallenge();
-  await donation.connect(admin).stop();
+  const closeTx = await challenge.connect(admin).closeChallenge();
+  await closeTx.wait(1);
+  const stopTx = await donation.connect(admin).stop();
+  await stopTx.wait(1);
 
   return [donation, challenge];
 }

@@ -300,61 +300,6 @@ export const donationFactoryAbi = [
     type: "constructor",
   },
   {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "donation",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "org",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "string",
-        name: "name",
-        type: "string",
-      },
-      {
-        indexed: false,
-        internalType: "string",
-        name: "description",
-        type: "string",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "whaleDonationMax",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "matchPercentage",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "bounty",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "duration",
-        type: "uint256",
-      },
-    ],
-    name: "DonationCreated",
-    type: "event",
-  },
-  {
     inputs: [],
     name: "CHALLENGE_COLLATERAL",
     outputs: [
@@ -438,6 +383,19 @@ export const donationFactoryAbi = [
   {
     inputs: [],
     name: "donationCount",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "numDonations",
     outputs: [
       {
         internalType: "uint256",
@@ -697,12 +655,165 @@ export const donationAbi = [
   },
   {
     inputs: [],
+    name: "getDonationData",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "token",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "id",
+            type: "uint256",
+          },
+          {
+            internalType: "string",
+            name: "name",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "description",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "stage",
+            type: "string",
+          },
+          {
+            internalType: "address",
+            name: "org",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "whale",
+            type: "address",
+          },
+          {
+            internalType: "bool",
+            name: "whaleRefunded",
+            type: "bool",
+          },
+          {
+            internalType: "uint256",
+            name: "whaleDonationMax",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "whaleDonationTotalAmount",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "bounty",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "matchPercentage",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "withdrawnAmount",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "createdAt",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "expireAt",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "emissionDuration",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "emissionRate",
+            type: "uint256",
+          },
+          {
+            internalType: "bool",
+            name: "emissionStopped",
+            type: "bool",
+          },
+          {
+            internalType: "uint256",
+            name: "donatedUsers",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "userDonationTotalAmount",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "challengesLength",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "reportsLength",
+            type: "uint256",
+          },
+          {
+            internalType: "bool",
+            name: "refundMatch",
+            type: "bool",
+          },
+          {
+            internalType: "uint256",
+            name: "refundAmountAfterStopped",
+            type: "uint256",
+          },
+          {
+            internalType: "bool",
+            name: "bountyClaimed",
+            type: "bool",
+          },
+        ],
+        internalType: "struct Donation.DonationData",
+        name: "",
+        type: "tuple",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
     name: "getRecentChallenge",
     outputs: [
       {
         internalType: "address",
         name: "",
         type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getStage",
+    outputs: [
+      {
+        internalType: "string",
+        name: "",
+        type: "string",
       },
     ],
     stateMutability: "view",
@@ -1374,4 +1485,4 @@ export const challengeAbi = [
       stateMutability: "view",
       type: "function",
     },
-  ];
+];

@@ -6,11 +6,15 @@ import { ChainId, DAppProvider, Config } from "@usedapp/core";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 const config: Config = {
-  readOnlyChainId: ChainId.Mumbai,
+  readOnlyChainId: ChainId.Localhost,
   readOnlyUrls: {
-    [ChainId.Mumbai]:
-      "https://polygon-mumbai.g.alchemy.com/v2/WOoOVulx3jcn_plLu_rMKYXbBGX-BRvG",
+    [ChainId.Localhost]: "http://127.0.0.1:8545",
   },
+  // readOnlyChainId: ChainId.Mumbai,
+  // readOnlyUrls: {
+  //   [ChainId.Mumbai]:
+  //     "https://polygon-mumbai.g.alchemy.com/v2/WOoOVulx3jcn_plLu_rMKYXbBGX-BRvG",
+  // },
 };
 ReactDOM.render(
   <React.StrictMode>

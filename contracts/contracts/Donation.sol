@@ -17,6 +17,7 @@ contract Donation {
         uint256 id;
         string name;
         string description;
+        string stage;
         address org;
         address whale;
         bool whaleRefunded;
@@ -109,33 +110,35 @@ contract Donation {
         donatedUsers = 0;
     }
 
-    function getDonationData() public view returns(DonationData memory) {
-      return DonationData({
-          token: token,
-          id: id,
-          name: name,
-          description: description,
-          org: org,
-          whale: whale,
-          whaleRefunded: whaleRefunded,
-          whaleDonationMax: whaleDonationMax,
-          whaleDonationTotalAmount: whaleDonationTotalAmount,
-          bounty: bounty,
-          matchPercentage: matchPercentage,
-          withdrawnAmount: withdrawnAmount,
-          createdAt: createdAt,
-          expireAt: expireAt,
-          emissionDuration: emissionDuration,
-          emissionRate: emissionRate,
-          emissionStopped: emissionStopped,
-          donatedUsers: donatedUsers,
-          userDonationTotalAmount: userDonationTotalAmount,
-          challengesLength: challenges.length,
-          reportsLength: reports.length,
-          refundMatch: refundMatch,
-          refundAmountAfterStopped: refundAmountAfterStopped,
-          bountyClaimed: bountyClaimed
-      });
+    function getDonationData() public view returns (DonationData memory) {
+        return
+            DonationData({
+                token: token,
+                id: id,
+                name: name,
+                description: description,
+                stage: getStage(),
+                org: org,
+                whale: whale,
+                whaleRefunded: whaleRefunded,
+                whaleDonationMax: whaleDonationMax,
+                whaleDonationTotalAmount: whaleDonationTotalAmount,
+                bounty: bounty,
+                matchPercentage: matchPercentage,
+                withdrawnAmount: withdrawnAmount,
+                createdAt: createdAt,
+                expireAt: expireAt,
+                emissionDuration: emissionDuration,
+                emissionRate: emissionRate,
+                emissionStopped: emissionStopped,
+                donatedUsers: donatedUsers,
+                userDonationTotalAmount: userDonationTotalAmount,
+                challengesLength: challenges.length,
+                reportsLength: reports.length,
+                refundMatch: refundMatch,
+                refundAmountAfterStopped: refundAmountAfterStopped,
+                bountyClaimed: bountyClaimed
+            });
     }
 
     function donate(uint256 amount) public {
@@ -232,6 +235,18 @@ contract Donation {
                 );
             }
         }
+    }
+
+    function getStage() public view returns (string memory) {
+        if (emissionStopped) {
+            return "Stopped";
+        }
+        if (block.timestamp < expireAt) {
+            return "Funding";
+        } else if (block.timestamp < expireAt + emissionDuration) {
+            return "Emitting";
+        }
+        return "Finished";
     }
 
     function getDAOAddress() public view returns (address) {
