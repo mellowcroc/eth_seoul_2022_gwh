@@ -12,6 +12,8 @@ contract DonationFactory {
     uint256 public donationCount;
     address[] public allDonations;
 
+    event DonationCreated(address donation, address whale, uint256 index);
+
     constructor(address token_) {
         token = token_;
         donationCount = 0;
@@ -37,12 +39,12 @@ contract DonationFactory {
         assembly {
             donation := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
-        IERC20(token).approve(donation, whaleDonationMax_ + bounty_);
         IERC20(token).transferFrom(
             msg.sender,
-            donation,
+            address(this),
             whaleDonationMax_ + bounty_
         );
+        IERC20(token).transfer(donation, whaleDonationMax_ + bounty_);
         Donation(donation).initialize(
             token,
             name_,
@@ -54,6 +56,8 @@ contract DonationFactory {
             bounty_,
             duration_
         );
+
+        emit DonationCreated(donation, msg.sender, donationCount);
         allDonations.push(donation);
         donationCount++;
     }
