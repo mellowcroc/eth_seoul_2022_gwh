@@ -9,10 +9,12 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 contract DonationFactory {
     uint256 public CHALLENGE_COLLATERAL = 50e18;
     address public token;
+    uint256 public donationCount;
     address[] public allDonations;
 
     constructor(address token_) {
         token = token_;
+        donationCount = 0;
     }
 
     function numDonations() public view returns (uint256) {
@@ -57,5 +59,6 @@ contract DonationFactory {
             duration_
         );
         allDonations.push(donation);
+        donationCount++;
     }
 }
