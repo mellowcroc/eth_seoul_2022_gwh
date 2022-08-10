@@ -11,6 +11,16 @@ contract DonationFactory {
     address public token;
     uint256 public donationCount;
     address[] public allDonations;
+    event DonationCreated(
+        address indexed donation,
+        address indexed org,
+        string name,
+        string description,
+        uint256 whaleDonationMax,
+        uint256 matchPercentage,
+        uint256 bounty,
+        uint256 duration
+    );
 
     constructor(address token_) {
         token = token_;
@@ -56,5 +66,16 @@ contract DonationFactory {
         );
         allDonations.push(donation);
         donationCount++;
+
+        emit DonationCreated(
+            donation,
+            org_,
+            name_,
+            description_,
+            whaleDonationMax_,
+            matchPercentage_,
+            bounty_,
+            duration_
+        );
     }
 }
