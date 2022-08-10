@@ -81,24 +81,25 @@ async function connectToExistContract() {
     await ethers.getSigners();
 
   usdc = USDC__factory.connect(
-    "0xeC3E29F9e5125eEA61E72b68EA84160dBc70E5e0",
+    "0x8169F403483B413c9a4Fba9D921aF49C3eF3BCf7",
     admin
   );
 
   donationFactory = DonationFactory__factory.connect(
-    "0x6c294Ff10303a9EB811c239B9AeB15A549818f80",
+    "0x1B8803F11e946767f8AF9595B22f74a637b0458D",
     admin
   );
 }
 
 async function generateFundingStateDonation() {
-  await usdc
+  const approveTx = await usdc
     .connect(whale)
     .approve(
       donationFactory.address,
       convertTo18Decimals(whaleFunding + cbounty)
     );
-  const tx = await donationFactory.connect(whale).createWhaleDonation(
+  await approveTx.wait(1);
+  const createTx = await donationFactory.connect(whale).createWhaleDonation(
     "Funding State Donation",
     "Funding State Donation Desc",
     org.address,
@@ -107,26 +108,26 @@ async function generateFundingStateDonation() {
     convertTo18Decimals(cbounty), // bounty
     3600 * 24 * 30 // 30 days
   );
-  await tx.wait(1);
-
+  await createTx.wait(1);
   const donationAddress = await donationFactory.allDonations(
     (await donationFactory.donationCount()).toNumber() - 1
   );
-
   return Donation__factory.connect(donationAddress, whale);
 }
 
 async function generateEmissionStateDonation() {
   const donation = await generateFundingStateDonation();
-
   const donationAmount = convertTo18Decimals(userDonating);
   for (const u of [user1, user2, user3]) {
-    await usdc.connect(u).approve(donation.address, donationAmount);
-    await donation.connect(u).donate(donationAmount);
+    const approveTx = await usdc
+      .connect(u)
+      .approve(donation.address, donationAmount);
+    await approveTx.wait(1);
+    const donateTx = await donation.connect(u).donate(donationAmount);
+    await donateTx.wait(1);
   }
-
-  await ethers.provider.send("evm_increaseTime", [3600 * 24 * 30]);
-  await ethers.provider.send("evm_mine", []);
+  // await ethers.provider.send("evm_increaseTime", [3600 * 24 * 30]);
+  // await ethers.provider.send("evm_mine", []);
   return donation;
 }
 
