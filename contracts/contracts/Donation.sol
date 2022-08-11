@@ -74,7 +74,7 @@ contract Donation {
     uint256 public refundAmountAfterStopped;
     bool public bountyClaimed;
 
-    address factory;
+    address public factory;
 
     constructor() {
         factory = msg.sender;
@@ -251,10 +251,6 @@ contract Donation {
         return "Finished";
     }
 
-    function getDAOAddress() public view returns (address) {
-        return factory;
-    }
-
     function openChallenge(string calldata desc) public {
         // XXX : can user open challenge in donate stage?
         require(
@@ -304,7 +300,7 @@ contract Donation {
         require(emissionStopped, "can only claim if emission is stopped");
         require(!bountyClaimed, "already claimed");
         require(
-            msg.sender == Challenge(getRecentChallenge()).getChallenger(),
+            msg.sender == Challenge(getRecentChallenge()).challenger(),
             "only challenger can claim bounty"
         );
         bountyClaimed = true;

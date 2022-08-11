@@ -11,9 +11,7 @@ contract DonationFactory {
     address public token;
     uint256 public donationCount;
     address[] public allDonations;
-    mapping(address => bool) public donationMap;
 
-    event DonationCreated(address donation, address whale, uint256 index);
     event WhaleFunded(address whale, address donation, uint256 amount);
     event UserDonated(address user, address donation, uint256 amount);
 
@@ -31,7 +29,6 @@ contract DonationFactory {
     }
 
     function emitUserDonation(address user, address donation, uint256 amount) public {
-        require(donationMap[donation], "Not a valid donation");
         emit UserDonated(user, donation, amount);
     }
 
@@ -69,10 +66,8 @@ contract DonationFactory {
             duration_
         );
 
-        emit DonationCreated(donation, msg.sender, donationCount);
         emit WhaleFunded(msg.sender, donation, whaleDonationMax_ + bounty_);
         allDonations.push(donation);
-        donationMap[donation] = true;
         donationCount++;
     }
 }

@@ -66,23 +66,25 @@ describe("Challenger", function () {
   it("Should deploy and initialize challenge", async function () {
     await usdc
       .connect(challenger)
-      .approve(await donation.getDAOAddress(), convertTo18Decimals(50));
+      .approve(await donation.factory(), convertTo18Decimals(50));
     await donation.connect(challenger).openChallenge("Simple vote");
     const challengeAddr = await donation.getRecentChallenge();
     challenge = Challenge__factory.connect(challengeAddr, challenger);
 
     const ts = (await ethers.provider.getBlock("latest")).timestamp;
-    expect(await challenge.getChallenger()).to.equal(challenger.address);
-    expect(await challenge.getDonation()).to.equal(donation.address);
-    expect(await challenge.getDesc()).to.equal("Simple vote");
+    expect(await challenge.challenger()).to.equal(challenger.address);
+    expect(await challenge.donation()).to.equal(donation.address);
+    expect(await challenge.desc()).to.equal("Simple vote");
     expect(await challenge.getChallengeStatus()).to.equal(
       ChallengeStatus.Ongoing
     );
-    const [yesVotes, noVotes, maxVoter] = await challenge.getVoteInfo();
+    const yesVotes = await challenge.yesVotes();
+    const noVotes = await challenge.noVotes();
+    const maxVoter = await challenge.maxVoter();
     expect(yesVotes).to.equal(0);
     expect(noVotes).to.equal(0);
     expect(maxVoter).to.equal(5);
-    expect(await challenge.getVotableUntil()).to.equal(ts + 14 * 60 * 60 * 24);
+    expect(await challenge.votableUntil()).to.equal(ts + 14 * 60 * 60 * 24);
   });
 
   it("Users should vote, non-users shouldnt vote", async function () {
@@ -94,7 +96,8 @@ describe("Challenger", function () {
     await challengeAsUser1.vote(true);
     await expect(challengeAsUser1.vote(true)).to.revertedWith("Already voted.");
 
-    let [yesVotes, noVotes, maxVoter] = await challenge.getVoteInfo();
+    let yesVotes = await challenge.yesVotes();
+    let noVotes = await challenge.noVotes();
     expect(yesVotes).to.equal(1);
     expect(noVotes).to.equal(0);
 
@@ -108,7 +111,8 @@ describe("Challenger", function () {
       "Already voted."
     );
 
-    [yesVotes, noVotes, maxVoter] = await challenge.getVoteInfo();
+    yesVotes = await challenge.yesVotes();
+    noVotes = await challenge.noVotes();
     expect(yesVotes).to.equal(1);
     expect(noVotes).to.equal(1);
 
@@ -120,7 +124,8 @@ describe("Challenger", function () {
     await challengeAsUser3.vote(true);
     await expect(challengeAsUser3.vote(true)).to.revertedWith("Already voted.");
 
-    [yesVotes, noVotes, maxVoter] = await challenge.getVoteInfo();
+    yesVotes = await challenge.yesVotes();
+    noVotes = await challenge.noVotes();
     expect(yesVotes).to.equal(2);
     expect(noVotes).to.equal(1);
   });

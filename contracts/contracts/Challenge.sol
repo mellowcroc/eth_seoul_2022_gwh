@@ -71,47 +71,6 @@ contract Challenge {
         maxVoter = maxVoter_;
     }
 
-    function getInfo()
-        public
-        view
-        returns (
-            address,
-            address,
-            string memory,
-            uint256
-        )
-    {
-        return (challenger, donation, desc, votableUntil);
-    }
-
-    function getVoteInfo()
-        public
-        view
-        returns (
-            uint256,
-            uint256,
-            uint256
-        )
-    {
-        return (yesVotes, noVotes, maxVoter);
-    }
-
-    function getChallenger() public view returns (address) {
-        return challenger;
-    }
-
-    function getDonation() public view returns (address) {
-        return donation;
-    }
-
-    function getDesc() public view returns (string memory) {
-        return desc;
-    }
-
-    function getVotableUntil() public view returns (uint256) {
-        return votableUntil;
-    }
-
     function vote(bool yn) public {
         require(block.timestamp < votableUntil, "Vote period has ended.");
         require(

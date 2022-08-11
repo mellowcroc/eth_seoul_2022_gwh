@@ -150,7 +150,7 @@ async function generateChallengingStateDonation(): Promise<
 
   const approveTx = await usdc
     .connect(challenger)
-    .approve(await donation.getDAOAddress(), convertTo18Decimals(ccollateral));
+    .approve(await donation.factory(), convertTo18Decimals(ccollateral));
   await approveTx.wait(1);
   const challengeTx = await donation
     .connect(challenger)

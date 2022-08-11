@@ -89,7 +89,7 @@ describe("Donation", function () {
   it("challenger can open challenges", async function () {
     await usdc
       .connect(challenger)
-      .approve(await donation.getDAOAddress(), convertTo18Decimals(50));
+      .approve(await donation.factory(), convertTo18Decimals(50));
     await donation
       .connect(challenger)
       .openChallenge("Here comes a new challenge");
