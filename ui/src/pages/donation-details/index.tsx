@@ -4,24 +4,10 @@ import { utils, BigNumber, Contract } from "ethers";
 import styled from "styled-components";
 import Header from "../../components/Header";
 import { useDonation } from "../../hooks/useDonation";
-import { ChallengeInterface } from "../../hooks/useDonations";
 import { useQuery } from "../../hooks/useQuery";
 import { DONATION_FACTORY, USDC_ADDRESS } from "../../contracts";
-import {
-  donationAbi,
-  donationFactoryAbi,
-  challengeAbi,
-  erc20Abi,
-} from "../../abis";
-import {
-  USDC,
-  Challenge__factory,
-  Challenge,
-  DonationFactory,
-  DonationFactory__factory,
-  Donation,
-  Donation__factory,
-} from "contracts";
+import { donationAbi, challengeAbi, erc20Abi } from "../../abis";
+import { USDC, Challenge, Donation } from "contracts";
 import ProgressBar from "react-bootstrap/ProgressBar";
 import Card from 'react-bootstrap/Card';
 import CardHeader from "react-bootstrap/esm/CardHeader";
