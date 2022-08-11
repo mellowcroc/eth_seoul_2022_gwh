@@ -106,8 +106,10 @@ export default function MyDonations() {
     const response = await client.query(tokensQuery, { account: "0x1c0f17b556f3a4bad43a9606554c5760e4dc3b76" }).toPromise();
     console.log("response:", response);
     setDonationAmount(response.data.users[0].total);
+    setDonationList(response.data.users[0].donations);
   }
   const [donationAmount, setDonationAmount] = useState(0);
+  const [donationList, setDonationList] = useState([]);
   useEffect(() => {
     fetchData()
   }, [account]);
@@ -182,6 +184,7 @@ export default function MyDonations() {
               TOTAL FUNDING AMOUNT <br></br>
               {donationAmount / 1000000000000000000} <br></br>
               LIST OF FUNDING DONATIONS
+              {donationList.map((address) => <h3>{address}</h3>)}
               <Slider {...sliderSettings}>
                 {
                   donations
