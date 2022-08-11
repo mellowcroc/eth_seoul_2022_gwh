@@ -7,6 +7,11 @@ import MyDonations from "./pages/my-donations";
 import CreateDonation from "./pages/create-donation";
 import DonationDetails from "./pages/donation-details";
 import styled from "styled-components";
+import { createClient, Provider } from 'urql'
+const APIURL = 'https://api.thegraph.com/subgraphs/name/jaehunkim/donationagg'
+const client = createClient({
+  url: APIURL,
+})
 
 const Header = styled.header`
   width: 100%;

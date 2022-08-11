@@ -1,4 +1,4 @@
-import React, { useState, Component } from 'react';
+import React, { useState, Component, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import Slider from "react-slick";
@@ -8,6 +8,19 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Connect from '../../components/Connect';
 import Header from '../../components/Header';
+import { createClient, useQuery, Provider } from 'urql'
+const APIURL = 'https://api.thegraph.com/subgraphs/name/jaehunkim/donationagg'
+
+const tokensQuery = `
+  query Users($account: ID!) {
+    users (where: {id: $account}) {
+      id
+      donations
+      amount
+      total
+    }
+  }
+`
 
 const Wrapper = styled.div`
   text-align: center;
@@ -80,6 +93,24 @@ class DonationSlideItem extends Component<ISlideItemProps> {
 }
 
 export default function MyDonations() {
+  const { account } = useEthers();
+  const client = createClient({
+    url: APIURL,
+  })
+
+  async function fetchData() {
+    if (!account)
+      return;
+
+    console.log("account: ", account);
+    const response = await client.query(tokensQuery, { account: "0x1c0f17b556f3a4bad43a9606554c5760e4dc3b76" }).toPromise();
+    console.log("response:", response);
+    setDonationAmount(response.data.users[0].total);
+  }
+  const [donationAmount, setDonationAmount] = useState(0);
+  useEffect(() => {
+    fetchData()
+  }, [account]);
   const sliderSettings = {
     // NOTE(): for other settings, see https://react-slick.neostack.com/docs/example/simple-slider
     infinite: true,
@@ -90,7 +121,6 @@ export default function MyDonations() {
     slidesToScroll: 1,
     speed: 500
   };
-  const { account } = useEthers();
   // TODO(): get the actual data from ethereum
   const [donations, setDonations] = useState([
     {
@@ -149,11 +179,13 @@ export default function MyDonations() {
         {
           account && (
             <SliderWrapper>
+              TOTAL FUNDING AMOUNT <br></br>
+              {donationAmount / 1000000000000000000} <br></br>
               LIST OF FUNDING DONATIONS
               <Slider {...sliderSettings}>
                 {
                   donations
-                    .map((donation: DonationPreview, index) => <DonationSlideItem donation={donation} key={index}/>)
+                    .map((donation: DonationPreview, index) => <DonationSlideItem donation={donation} key={index} />)
                 }
               </Slider>
             </SliderWrapper>

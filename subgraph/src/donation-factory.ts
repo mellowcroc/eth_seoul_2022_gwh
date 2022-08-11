@@ -18,8 +18,13 @@ export function handleDonationCreated(event: DonationCreated): void {
     entity.whales = new Array<Bytes>();
   }
 
-  entity.donations.push(event.params.donation);
-  entity.whales.push(event.params.whale);
+  let donations = entity.donations;
+  donations.push(event.params.donation);
+  entity.donations = donations;
+
+  let whales = entity.whales;
+  whales.push(event.params.whale);
+  entity.whales = whales;
 
   entity.save();
 }
@@ -36,8 +41,13 @@ export function handleUserDonated(event: UserDonated): void {
     entity.total = BigInt.fromI32(0);
   }
 
-  entity.donations.push(event.params.donation);
-  entity.amount.push(event.params.amount);
+  let donations = entity.donations;
+  donations.push(event.params.donation);
+  entity.donations = donations;
+
+  let amount = entity.amount;
+  amount.push(event.params.amount);
+  entity.amount = amount;
   entity.total = entity.total + event.params.amount;
 
   entity.save();
@@ -55,8 +65,13 @@ export function handleWhaleFunded(event: WhaleFunded): void {
     entity.total = BigInt.fromI32(0);
   }
 
-  entity.donations.push(event.params.donation);
-  entity.amount.push(event.params.amount);
+  let donations = entity.donations;
+  donations.push(event.params.donation);
+  entity.donations = donations;
+
+  let amount = entity.amount;
+  amount.push(event.params.amount);
+  entity.amount = amount;
   entity.total = entity.total + event.params.amount;
 
   entity.save();

@@ -4,10 +4,10 @@
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
-    "deploy": "graph deploy --product hosted-service jaehunkim/Donationaggregate",
-    "create-local": "graph create --node http://localhost:8020/ jaehunkim/Donationaggregate",
-    "remove-local": "graph remove --node http://localhost:8020/ jaehunkim/Donationaggregate",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 jaehunkim/Donationaggregate",
+    "deploy": "graph deploy --product hosted-service jaehunkim/Donationagg2",
+    "create-local": "graph create --node http://localhost:8020/ jaehunkim/Donationagg2",
+    "remove-local": "graph remove --node http://localhost:8020/ jaehunkim/Donationagg2",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 jaehunkim/Donationagg2",
     "test": "graph test"
   },
   "dependencies": {

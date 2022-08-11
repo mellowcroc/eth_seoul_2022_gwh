@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@apollo/client": "^3.6.9",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^12.0.0",
     "@testing-library/user-event": "^13.2.1",
@@ -14,6 +15,7 @@
     "@walletconnect/web3-provider": "^1.8.0",
     "bootstrap": "^5.2.0",
     "contracts": "^0.4.0",
+    "graphql": "^16.5.0",
     "react": "^18.0.0",
     "react-bootstrap": "^2.5.0",
     "react-dom": "^18.0.0",
@@ -23,6 +25,7 @@
     "slick-carousel": "^1.8.1",
     "styled-components": "^5.3.5",
     "typescript": "^4.4.2",
+    "urql": "^2.2.3",
     "web-vitals": "^2.1.0"
   },
   "scripts": {
