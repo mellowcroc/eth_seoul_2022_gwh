@@ -13,6 +13,7 @@ import {
   challengeAbi,
   erc20Abi,
 } from "../../abis";
+
 import {
   USDC,
   Challenge__factory,
@@ -23,6 +24,9 @@ import {
   Donation__factory,
 } from "contracts";
 import ProgressBar from "react-bootstrap/ProgressBar";
+const https = require("https");
+require("dotenv").config();
+var ipfsClient = require("ipfs-http-client");
 
 function convertTo18Decimals(num: number) {
   return BigNumber.from(num).mul(BigNumber.from(10).pow(18));
@@ -98,7 +102,6 @@ const ChallengeEntity = styled.div``;
 
 // const ReportWrapper = styled.div``;
 // const Report = styled.div``;
-
 export default function DonationDetails() {
   const query = useQuery();
   const donationAddress = query.get("address") || "";
@@ -108,13 +111,51 @@ export default function DonationDetails() {
   console.log("donation: ", donation);
   const [donationAmount, setDonationAmount] = useState(1000);
 
+  const projectId = process.env.INFURA_PROJECT_ID;
+  const projectSecret = process.env.INFURA_PROJECT_SECRET;
+  console.log("process.env: ", process.env);
+  console.log("projectId: ", projectId);
+  console.log("projectSecret: ", projectSecret);
+  const auth =
+    "Basic " + Buffer.from(projectId + ":" + projectSecret).toString("base64");
+  const client = ipfsClient({
+    host: "ipfs.infura.io",
+    port: 5001,
+    protocol: "https",
+    headers: {
+      authorization: auth,
+    },
+  });
+  // client.pin
+  //   .add("QmeGAVddnBSnKc1DLE7DLV9uuTqo5F7QbaveTjr45JUdQn")
+  //   .then((res: any) => {
+  //     console.log(res);
+  //   });
+
+  const [fileUrl, updateFileUrl] = useState(``);
+  async function onChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target as HTMLInputElement;
+    if (!input.files?.length) {
+      return;
+    }
+
+    const file = input.files[0];
+    try {
+      const added = await client.add(file);
+      const url = `https://ipfs.infura.io/ipfs/${added.path}`;
+      updateFileUrl(url);
+    } catch (error) {
+      console.log("Error uploading file: ", error);
+    }
+  }
+
   const signer = useMemo(() => library?.getSigner(), [library]);
   const donationContract = useMemo<Donation | undefined>(
     () =>
       signer
         ? (
-          new Contract(donationAddress, donationAbi, library) as Donation
-        ).connect(signer)
+            new Contract(donationAddress, donationAbi, library) as Donation
+          ).connect(signer)
         : undefined,
     [signer, library, donationAddress]
   );
@@ -122,8 +163,8 @@ export default function DonationDetails() {
     () =>
       signer
         ? (new Contract(USDC_ADDRESS, erc20Abi, library) as USDC).connect(
-          signer
-        )
+            signer
+          )
         : undefined,
     [signer, library]
   );
@@ -131,12 +172,12 @@ export default function DonationDetails() {
     () =>
       signer && donationContract && donation && donation.recentchallengeaddr
         ? (
-          new Contract(
-            donation.recentchallengeaddr,
-            challengeAbi,
-            library
-          ) as Challenge
-        ).connect(signer)
+            new Contract(
+              donation.recentchallengeaddr,
+              challengeAbi,
+              library
+            ) as Challenge
+          ).connect(signer)
         : undefined,
     [signer, library, donationContract, donation]
   );
@@ -255,12 +296,15 @@ export default function DonationDetails() {
                   <ProgressBar
                     striped
                     now={
-                      donation.recentchallenge.yesVotes /
-                      (donation.recentchallenge.maxVoter) * 100
+                      (donation.recentchallenge.yesVotes /
+                        donation.recentchallenge.maxVoter) *
+                      100
                     }
-                    label={`${donation.recentchallenge.yesVotes /
-                      (donation.recentchallenge.maxVoter) * 100
-                      }%`}
+                    label={`${
+                      (donation.recentchallenge.yesVotes /
+                        donation.recentchallenge.maxVoter) *
+                      100
+                    }%`}
                   />
                   Votes(yes/no(max)): {donation.recentchallenge.yesVotes}/
                   {donation.recentchallenge.noVotes} (
@@ -287,6 +331,12 @@ export default function DonationDetails() {
             />
 
             <CreateButton onClick={_handleUserDonation}>Donate!!</CreateButton>
+
+            <div className="App">
+              <h1>IPFS Example</h1>
+              <input type="file" onChange={onChange} />
+              {fileUrl && <img src={fileUrl} width="600px" />}
+            </div>
 
             {
               //  P2
