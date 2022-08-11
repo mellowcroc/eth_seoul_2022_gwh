@@ -159,6 +159,8 @@ contract Donation {
             donatedUsers++;
         }
         userDonations[msg.sender] += amount;
+
+        DonationFactory(factory).emitUserDonation(msg.sender, address(this), amount);
     }
 
     function createReport(bytes32 ipfsHash) public {

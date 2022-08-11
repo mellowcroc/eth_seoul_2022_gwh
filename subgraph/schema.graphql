@@ -1,0 +1,19 @@
+type Donations @entity {
+  id: ID! # contract address
+  donations: [Bytes!]!
+  whales: [Bytes!]!
+}
+
+type User @entity {
+  id: ID! # wallet address
+  donations: [Bytes!]!
+  amount: [BigInt!]!
+  total: BigInt!
+}
+
+type Whale @entity {
+  id: ID! # wallet address
+  donations: [Bytes!]!
+  amount: [BigInt!]!
+  total: BigInt!
+}
