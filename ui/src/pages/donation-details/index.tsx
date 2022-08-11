@@ -9,10 +9,10 @@ import { DONATION_FACTORY, USDC_ADDRESS } from "../../contracts";
 import { donationAbi, challengeAbi, erc20Abi } from "../../abis";
 import { USDC, Challenge, Donation } from "contracts";
 import ProgressBar from "react-bootstrap/ProgressBar";
-import Card from 'react-bootstrap/Card';
+import Card from "react-bootstrap/Card";
 import CardHeader from "react-bootstrap/esm/CardHeader";
-import Alert from 'react-bootstrap/Alert';
-import Button from 'react-bootstrap/Button';
+import Alert from "react-bootstrap/Alert";
+import Button from "react-bootstrap/Button";
 
 /* import the ipfs-http-client library */
 
@@ -110,8 +110,8 @@ export default function DonationDetails() {
     () =>
       signer
         ? (
-          new Contract(donationAddress, donationAbi, library) as Donation
-        ).connect(signer)
+            new Contract(donationAddress, donationAbi, library) as Donation
+          ).connect(signer)
         : undefined,
     [signer, library, donationAddress]
   );
@@ -119,8 +119,8 @@ export default function DonationDetails() {
     () =>
       signer
         ? (new Contract(USDC_ADDRESS, erc20Abi, library) as USDC).connect(
-          signer
-        )
+            signer
+          )
         : undefined,
     [signer, library]
   );
@@ -128,12 +128,12 @@ export default function DonationDetails() {
     () =>
       signer && donationContract && donation && donation.recentchallengeaddr
         ? (
-          new Contract(
-            donation.recentchallengeaddr,
-            challengeAbi,
-            library
-          ) as Challenge
-        ).connect(signer)
+            new Contract(
+              donation.recentchallengeaddr,
+              challengeAbi,
+              library
+            ) as Challenge
+          ).connect(signer)
         : undefined,
     [signer, library, donationContract, donation]
   );
@@ -233,9 +233,9 @@ export default function DonationDetails() {
       </HeaderContainer>
       <Content>
         {donation === null ||
-          donation === undefined ||
-          account === undefined ||
-          balance === undefined ? (
+        donation === undefined ||
+        account === undefined ||
+        balance === undefined ? (
           <></>
         ) : (
           <>
@@ -244,19 +244,27 @@ export default function DonationDetails() {
             <Card bg="secondary">
               <CardHeader>
                 <Id>Contract address: {donation.contractAddress}</Id>
-                <Alert variant="secondary">
-                  Stage: {donation.stage}
-                </Alert>
+                <Alert variant="secondary">Stage: {donation.stage}</Alert>
               </CardHeader>
               <Name>Name: {donation.name}</Name>
               <Description>Description: {donation.description}</Description>
-              <a href="http://127.0.0.1:8080/ipfs/QmfQ29fgHP9zitCyw9czdqNvM9gtKRFFbN9nJmZCdLC7QB">REPORTS IN IPFS</a>
+              <a href="http://127.0.0.1:8080/ipfs/QmfQ29fgHP9zitCyw9czdqNvM9gtKRFFbN9nJmZCdLC7QB">
+                REPORTS IN IPFS
+              </a>
               <Organization>Organization: {donation.org}</Organization>
               <Whale>Whale: {donation.whale}</Whale>
 
               <Card.Footer>
                 <MatchWrapper>
                   Matching Info
+                  <MatchPercent>
+                    Remaining pool :{" "}
+                    {utils.formatUnits(
+                      donation.whaleDonationTotalAmount.add(
+                        donation.userDonationTotalAmount
+                      )
+                    )}
+                  </MatchPercent>
                   <MatchAmount>
                     Matching Amount:{" "}
                     {utils.formatUnits(donation.whaleDonationTotalAmount)}
@@ -285,15 +293,22 @@ export default function DonationDetails() {
                     setDonationAmount(Number(event.target.value));
                   }}
                 />
-                <CreateButton onClick={_handleUserDonation}>Donate!!</CreateButton>
+                <CreateButton onClick={_handleUserDonation}>
+                  Donate!!
+                </CreateButton>
               </Card>
-            ) : <></>}
+            ) : (
+              <></>
+            )}
 
-            {donation.stage === "Emitting" && donation.challengesLength === 0 ? (
+            {donation.stage === "Emitting" &&
+            donation.challengesLength === 0 ? (
               <CreateButton onClick={_handleUserChallenge}>
                 Challenge!!
               </CreateButton>
-            ) : <></>}
+            ) : (
+              <></>
+            )}
 
             {donation.challengesLength === 0 || !donation.recentchallenge ? (
               <></>
@@ -304,7 +319,8 @@ export default function DonationDetails() {
                   <ChallengeEntity>
                     challenger: {donation.recentchallenge.challenger}
                     <br></br>
-                    challenge address: {donation.recentchallenge.contractAddress}
+                    challenge address:{" "}
+                    {donation.recentchallenge.contractAddress}
                   </ChallengeEntity>
                   <ChallengeEntity>
                     desc: {donation.recentchallenge.desc}
@@ -323,10 +339,11 @@ export default function DonationDetails() {
                           donation.recentchallenge.maxVoter) *
                         100
                       }
-                      label={`${(donation.recentchallenge.yesVotes /
-                        donation.recentchallenge.maxVoter) *
+                      label={`${
+                        (donation.recentchallenge.yesVotes /
+                          donation.recentchallenge.maxVoter) *
                         100
-                        }%`}
+                      }%`}
                     />
                     Votes(yes/no(max)): {donation.recentchallenge.yesVotes}/
                     {donation.recentchallenge.noVotes} (
@@ -335,11 +352,18 @@ export default function DonationDetails() {
                   <ChallengeEntity>
                     Status: {donation.recentchallenge.status}
                   </ChallengeEntity>
-                  <Button variant="success" size="lg" onClick={_handleVoteYes}>Vote yes!!</Button>
-                  <Button variant="warning" size="lg" onClick={_handleVoteNo}>Vote no!!</Button>
-
+                  <Button variant="success" size="lg" onClick={_handleVoteYes}>
+                    Vote yes!!
+                  </Button>
+                  <Button variant="warning" size="lg" onClick={_handleVoteNo}>
+                    Vote no!!
+                  </Button>
                   <ChallengeEntity>
-                    <Button variant="danger" size="lg" onClick={_handleStopChallenge}>
+                    <Button
+                      variant="danger"
+                      size="lg"
+                      onClick={_handleStopChallenge}
+                    >
                       Stop challenge!!
                     </Button>
                   </ChallengeEntity>
@@ -354,13 +378,17 @@ export default function DonationDetails() {
                   Claim Bounty
                 </CreateButton>
               </Card>
-            ) : <></>}
+            ) : (
+              <></>
+            )}
 
             {donation.whale === account && donation.stage !== "Funding" ? (
               <Card bg="secondary">
                 <CreateButton onClick={_handleRefund}>Refund</CreateButton>
               </Card>
-            ) : <></>}
+            ) : (
+              <></>
+            )}
 
             <ChallengeEntity>
               USDC balance: {utils.formatUnits(balance)}

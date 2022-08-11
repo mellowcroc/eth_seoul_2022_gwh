@@ -85,12 +85,12 @@ export default function CreateDonation() {
     () =>
       signer
         ? (
-          new Contract(
-            DONATION_FACTORY,
-            donationFactoryAbi,
-            library
-          ) as DonationFactory
-        ).connect(signer)
+            new Contract(
+              DONATION_FACTORY,
+              donationFactoryAbi,
+              library
+            ) as DonationFactory
+          ).connect(signer)
         : undefined,
     [signer, library]
   );
@@ -98,8 +98,8 @@ export default function CreateDonation() {
     () =>
       signer
         ? (new Contract(USDC_ADDRESS, erc20Abi, library) as USDC).connect(
-          signer
-        )
+            signer
+          )
         : undefined,
     [signer, library]
   );
@@ -153,6 +153,7 @@ export default function CreateDonation() {
                 setDescription(event.target.value);
               }}
             />
+            Charity Organization
             <StyledInput
               value={org}
               placeholder="Charity Organization"
@@ -160,7 +161,9 @@ export default function CreateDonation() {
                 setOrg(event.target.value);
               }}
             />
+            Whale Address
             <StyledInput placeholder="Whale" value={account} />
+            Whale will donate
             <StyledInput
               value={matchPool}
               placeholder="Match Pool"
@@ -168,6 +171,7 @@ export default function CreateDonation() {
                 setMatchPool(Number(event.target.value));
               }}
             />
+            Dollars for the bounties
             <StyledInput
               value={bountyPool}
               placeholder="Bounty Pool"
@@ -175,6 +179,7 @@ export default function CreateDonation() {
                 setBountyPool(Number(event.target.value));
               }}
             />
+            Whale will donate this much more
             <StyledInput
               value={matchPerc}
               placeholder="Match Percentage"
@@ -182,6 +187,7 @@ export default function CreateDonation() {
                 setMatchPerc(Number(event.target.value));
               }}
             />
+            Funding time limit
             <StyledInput
               value={matchExpireAt}
               placeholder="Matching Expiration"
@@ -189,7 +195,6 @@ export default function CreateDonation() {
                 setMatchExpireAt(Number(event.target.value));
               }}
             />
-
             <CreateButton onClick={_handleCreateDonation}>Create!</CreateButton>
           </>
         )}
