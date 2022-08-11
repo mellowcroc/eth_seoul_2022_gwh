@@ -1,0 +1,27 @@
+Good Whale Hunting
+
+A decentralized, optimistic donation protocol
+
+In our view, the donation space face two problems: low demand and low transparency.
+
+Normally, people can only donate a small amount of are small  and they forget about it.
+This means that donations are not very sticky and they do not require a lot of accountability from charities.
+
+Our protocol increases demand and transparency for donations by the following:
+
+1. DEMAND:
+  - Use "matching donations" instead of single donations: Organizations (aka whales) can create a donation contract, promising to match user donations up to X amount of dollars instead of just donating X amount of dollars. This method is known to boost donation demand (https://tinyurl.com/2p8zw7df).
+  - Enforce matching via smart contracts: Organizations may back out of their initial promise for matching (e.g. if demand is higher than expected), but they won't be able to since the initial promised amount will be locked up in the smart contract until donation period is over.
+
+2. TRANSPARENCY:
+  -  Add voting-based challenges: Transparency regarding how charities use their donations is always hard to achieve. Charities will receive the donation based on a release schedule (e.g. monthly over a 6-month period) instead of as a lump-sum and during the release schedule, anyone can start a challenge on-chain to stop the release via voting. So the charity is incentivized to continuously communicate how they are spending their money. The vote will be a 2-week process (where the donors each have a vote) and if it passes, the remaining donation will be refunded to the donors.
+
+
+  1. It was challenging to design a protocol where every party is incentivized to behave well, but I think we did a good job of identifying and tying up all the loose ends.
+  - Whales cannot cheat by promising to match donations and then withdrawing at the last minute
+  - Charities cannot cheat because they may lose the donation if they are not transaparent throughout the release schedule
+  - Challengers cannot cheat because they need to put up a certain amount of collateral and lose it if they make false claims
+
+2. When deploying on Polygon testnet, we needed to wait for transactions to be included in the block because of node synchronization issues.
+
+3. When using The Graph, we needed plenty of time for iterations because it took a long time for subgraphs to sync to the whole blockchain history.
