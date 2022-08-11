@@ -4,9 +4,7 @@ import { utils, BigNumber, Contract } from "ethers";
 import styled from "styled-components";
 import Header from "../../components/Header";
 import { useDonation } from "../../hooks/useDonation";
-import {
-  ChallengeInterface,
-} from "../../hooks/useDonations";
+import { ChallengeInterface } from "../../hooks/useDonations";
 import { useQuery } from "../../hooks/useQuery";
 import { DONATION_FACTORY, USDC_ADDRESS } from "../../contracts";
 import {
@@ -24,6 +22,7 @@ import {
   Donation,
   Donation__factory,
 } from "contracts";
+import ProgressBar from "react-bootstrap/ProgressBar";
 
 function convertTo18Decimals(num: number) {
   return BigNumber.from(num).mul(BigNumber.from(10).pow(18));
@@ -132,22 +131,29 @@ export default function DonationDetails() {
     () =>
       signer && donationContract && donation && donation.recentchallengeaddr
         ? (
-          new Contract(donation.recentchallengeaddr, challengeAbi, library) as Challenge
+          new Contract(
+            donation.recentchallengeaddr,
+            challengeAbi,
+            library
+          ) as Challenge
         ).connect(signer)
         : undefined,
     [signer, library, donationContract, donation]
   );
 
   const _handleUserChallenge = async () => {
-    if (!donationContract || !usdc || !account || !donationAddress || !donation) {
+    if (
+      !donationContract ||
+      !usdc ||
+      !account ||
+      !donationAddress ||
+      !donation
+    ) {
       alert("Connect wallet first");
       return;
     }
 
-    const tx = await usdc.approve(
-      donationAddress,
-      donation.bounty
-    );
+    const tx = await usdc.approve(donationAddress, donation.bounty);
     await tx.wait(1);
     console.log("Bounty amount : ", donation.bounty);
     await donationContract.openChallenge("ChallengeDesc");
@@ -234,32 +240,43 @@ export default function DonationDetails() {
               <ChallengeWrapper>
                 Recent Challenge Info
                 <ChallengeEntity>
-                  challenger:{" "}
-                  {donation.recentchallenge.challenger}
+                  challenger: {donation.recentchallenge.challenger}
                 </ChallengeEntity>
                 <ChallengeEntity>
-                  desc:{" "}
-                  {donation.recentchallenge.desc}
+                  desc: {donation.recentchallenge.desc}
                 </ChallengeEntity>
                 <ChallengeEntity>
                   votableUntil:{" "}
-                  {new Date(donation.recentchallenge.votableUntil * 1000).toLocaleString()}
+                  {new Date(
+                    donation.recentchallenge.votableUntil * 1000
+                  ).toLocaleString()}
                 </ChallengeEntity>
                 <ChallengeEntity>
-                  Votes(yes/no(max)): {donation.recentchallenge.yesVotes}/{donation.recentchallenge.noVotes} ({donation.recentchallenge.maxVoter})
+                  <ProgressBar
+                    striped
+                    now={
+                      donation.recentchallenge.yesVotes /
+                      (donation.recentchallenge.maxVoter) * 100
+                    }
+                    label={`${donation.recentchallenge.yesVotes /
+                      (donation.recentchallenge.maxVoter) * 100
+                      }%`}
+                  />
+                  Votes(yes/no(max)): {donation.recentchallenge.yesVotes}/
+                  {donation.recentchallenge.noVotes} (
+                  {donation.recentchallenge.maxVoter})
                 </ChallengeEntity>
                 <ChallengeEntity>
-                  Status:{" "}
-                  {donation.recentchallenge.status}
+                  Status: {donation.recentchallenge.status}
                 </ChallengeEntity>
-
                 <CreateButton onClick={_handleVoteYes}>Vote yes!!</CreateButton>
                 <CreateButton onClick={_handleVoteNo}>Vote no!!</CreateButton>
               </ChallengeWrapper>
-            )
-            }
+            )}
 
-            <CreateButton onClick={_handleUserChallenge}>Challenge!!</CreateButton>
+            <CreateButton onClick={_handleUserChallenge}>
+              Challenge!!
+            </CreateButton>
 
             <StyledInput
               value={donationAmount}
