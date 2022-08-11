@@ -45,7 +45,7 @@ async function deployContract() {
 
   const USDC = await ethers.getContractFactory("USDC");
   usdc = await USDC.deploy(
-    ethers.BigNumber.from(100_000).mul(ethers.BigNumber.from(10).pow(18))
+    ethers.BigNumber.from(100_000_000).mul(ethers.BigNumber.from(10).pow(18))
   );
   console.log("USDC deployed to:", usdc.address);
 
@@ -57,7 +57,7 @@ async function deployContract() {
 
 async function distributeTokens() {
   console.log("Distributing tokens...");
-  const whaleAmount = convertTo18Decimals((whaleFunding + cbounty) * 5);
+  const whaleAmount = convertTo18Decimals((whaleFunding + cbounty) * 500);
   const userAmount = convertTo18Decimals(userDonating * 5);
   const challengerAmount = convertTo18Decimals(ccollateral * 2);
 
