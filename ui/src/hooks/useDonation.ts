@@ -10,14 +10,19 @@ import {
   Donation__factory,
 } from "contracts";
 import { donationAbi, donationFactoryAbi, challengeAbi } from "../abis";
-import { DonationInterface, convertToDonationInterface } from "./useDonations";
+import {
+  DonationInterface,
+  convertToDonationInterface,
+  ChallengeInterface,
+  convertToChallengeInterface,
+} from "./useDonations";
 
 function isMyDonation(donation: DonationInterface, myAddress: string) {
   return (
     donation.org === myAddress ||
     donation.whale === myAddress ||
     donation.myDonation > 0 ||
-    donation.challenger === myAddress
+    donation.recentchallenge?.challenger === myAddress
   );
 }
 
@@ -37,7 +42,9 @@ export const useDonation = (donationAddress: string, walletAddress: string) => {
     ) as Donation;
     const donationDataArr = await _donation.getDonationData();
     const myDonationAmount = myAddress
-      ? (await _donation.userDonations(myAddress)).toNumber()
+      ? Number(
+          (await _donation.userDonations(myAddress)).toBigInt() / BigInt(10e18)
+        )
       : 0;
     const donationData: DonationInterface = convertToDonationInterface(
       donationAddress,
@@ -47,15 +54,15 @@ export const useDonation = (donationAddress: string, walletAddress: string) => {
 
     if (donationData.challengesLength > 0) {
       const recentChallengeAddress = await _donation.getRecentChallenge();
+      donationData.recentchallengeaddr = recentChallengeAddress;
       const recentChallenge = new Contract(
         recentChallengeAddress,
         challengeAbi,
         library
       ) as Challenge;
-      const recentChallengeData = (await recentChallenge.getInfo()).map((x) =>
-        BigNumber.isBigNumber(x) ? x.toNumber() : x
-      );
-      donationData.challenger = recentChallengeData[0] as string;
+      const challengeDataArr = await recentChallenge.getChallengeData();
+      donationData.recentchallenge =
+        convertToChallengeInterface(challengeDataArr);
     }
     setDonation(donationData);
     setMyDonation(myAddress ? isMyDonation(donationData, myAddress) : false);
