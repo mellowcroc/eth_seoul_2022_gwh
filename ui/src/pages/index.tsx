@@ -148,7 +148,8 @@ class DonationSlideItem extends Component<ISlideItemProps> {
         <DonationItem {...props}>
           <DonationInner>
             <DonationTitle>{donation.name}</DonationTitle>
-            <div>{donation.description}</div>
+            <div>Contract address: {donation.address}</div>
+            <div>Description: {donation.description}</div>
             <div>Org: {donation.orgAddress}</div>
             <div>Whale: {donation.whaleAddress}</div>
             <DonationLink to={`/donation-details?address=${donation.address}`}>
@@ -201,7 +202,10 @@ export default function Home() {
         whaleAddress: donations[i].whale,
         orgAddress: donations[i].org,
       });
-    } else if (donations[i].stage === "Finished") {
+    } else if (
+      donations[i].stage === "Finished" ||
+      donations[i].stage === "Stopped"
+    ) {
       finishedDonations.push({
         address: donations[i].contractAddress,
         name: donations[i].name,

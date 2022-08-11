@@ -1,5 +1,5 @@
-import { useEthers } from "@usedapp/core";
-import { useState, useMemo } from "react";
+import { useEthers, useTokenBalance } from "@usedapp/core";
+import { useState, useMemo, useEffect } from "react";
 import { utils, BigNumber, Contract } from "ethers";
 import styled from "styled-components";
 import Header from "../../components/Header";
@@ -104,17 +104,19 @@ export default function DonationDetails() {
   const donationAddress = query.get("address") || "";
   console.log("donationAddress: ", donationAddress);
   const { account, library } = useEthers();
+  console.log("account: ", account);
   const { donation } = useDonation(donationAddress, ""); // TODO
   console.log("donation: ", donation);
   const [donationAmount, setDonationAmount] = useState(1000);
+  const balance = useTokenBalance(USDC_ADDRESS, account);
 
   const signer = useMemo(() => library?.getSigner(), [library]);
   const donationContract = useMemo<Donation | undefined>(
     () =>
       signer
         ? (
-          new Contract(donationAddress, donationAbi, library) as Donation
-        ).connect(signer)
+            new Contract(donationAddress, donationAbi, library) as Donation
+          ).connect(signer)
         : undefined,
     [signer, library, donationAddress]
   );
@@ -122,8 +124,8 @@ export default function DonationDetails() {
     () =>
       signer
         ? (new Contract(USDC_ADDRESS, erc20Abi, library) as USDC).connect(
-          signer
-        )
+            signer
+          )
         : undefined,
     [signer, library]
   );
@@ -131,12 +133,12 @@ export default function DonationDetails() {
     () =>
       signer && donationContract && donation && donation.recentchallengeaddr
         ? (
-          new Contract(
-            donation.recentchallengeaddr,
-            challengeAbi,
-            library
-          ) as Challenge
-        ).connect(signer)
+            new Contract(
+              donation.recentchallengeaddr,
+              challengeAbi,
+              library
+            ) as Challenge
+          ).connect(signer)
         : undefined,
     [signer, library, donationContract, donation]
   );
@@ -192,13 +194,53 @@ export default function DonationDetails() {
     await donationContract.donate(convertTo18Decimals(donationAmount));
   };
 
+  const _handleStopChallenge = async () => {
+    if (!challengeContract || !donationContract) {
+      alert("Connect wallet first");
+      return;
+    }
+
+    await challengeContract.closeChallenge();
+    await donationContract.stop();
+  };
+
+  const _handleRefund = async () => {
+    if (!donationContract) {
+      alert("Connect wallet first");
+      return;
+    }
+
+    await donationContract.refund();
+  };
+
+  const _handleClaimBounty = async () => {
+    if (!donationContract) {
+      alert("Connect wallet first");
+      return;
+    }
+
+    await donationContract.claimBounty();
+  };
+
+  const _handleWithdraw = async () => {
+    if (!donationContract) {
+      alert("Connect wallet first");
+      return;
+    }
+
+    await donationContract.withdraw();
+  };
+
   return (
     <Container>
       <HeaderContainer>
         <Header />
       </HeaderContainer>
       <Content>
-        {donation === null || donation === undefined ? (
+        {donation === null ||
+        donation === undefined ||
+        account === undefined ||
+        balance === undefined ? (
           <></>
         ) : (
           <>
@@ -241,6 +283,8 @@ export default function DonationDetails() {
                 Recent Challenge Info
                 <ChallengeEntity>
                   challenger: {donation.recentchallenge.challenger}
+                  <br></br>
+                  challenge address: {donation.recentchallenge.contractAddress}
                 </ChallengeEntity>
                 <ChallengeEntity>
                   desc: {donation.recentchallenge.desc}
@@ -255,12 +299,15 @@ export default function DonationDetails() {
                   <ProgressBar
                     striped
                     now={
-                      donation.recentchallenge.yesVotes /
-                      (donation.recentchallenge.maxVoter) * 100
+                      (donation.recentchallenge.yesVotes /
+                        donation.recentchallenge.maxVoter) *
+                      100
                     }
-                    label={`${donation.recentchallenge.yesVotes /
-                      (donation.recentchallenge.maxVoter) * 100
-                      }%`}
+                    label={`${
+                      (donation.recentchallenge.yesVotes /
+                        donation.recentchallenge.maxVoter) *
+                      100
+                    }%`}
                   />
                   Votes(yes/no(max)): {donation.recentchallenge.yesVotes}/
                   {donation.recentchallenge.noVotes} (
@@ -287,6 +334,17 @@ export default function DonationDetails() {
             />
 
             <CreateButton onClick={_handleUserDonation}>Donate!!</CreateButton>
+            <CreateButton onClick={_handleStopChallenge}>
+              Stop challenge!!
+            </CreateButton>
+            <CreateButton onClick={_handleRefund}>Refund</CreateButton>
+            <CreateButton onClick={_handleWithdraw}>Withdraw</CreateButton>
+            <CreateButton onClick={_handleClaimBounty}>
+              Claim Bounty
+            </CreateButton>
+            <ChallengeEntity>
+              USDC balance: {utils.formatUnits(balance)}
+            </ChallengeEntity>
 
             {
               //  P2
