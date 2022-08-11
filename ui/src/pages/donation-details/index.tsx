@@ -4,6 +4,9 @@ import { utils, BigNumber, Contract } from "ethers";
 import styled from "styled-components";
 import Header from "../../components/Header";
 import { useDonation } from "../../hooks/useDonation";
+import {
+  ChallengeInterface,
+} from "../../hooks/useDonations";
 import { useQuery } from "../../hooks/useQuery";
 import { DONATION_FACTORY, USDC_ADDRESS } from "../../contracts";
 import {
@@ -91,8 +94,8 @@ const CreateButton = styled.button``;
 // const UserDonationWrapper = styled.div``;
 // const UserDonation = styled.div``;
 
-// const ChallengeWrapper = styled.div``;
-// const Challenge = styled.div``;
+const ChallengeWrapper = styled.div``;
+const ChallengeEntity = styled.div``;
 
 // const ReportWrapper = styled.div``;
 // const Report = styled.div``;
@@ -125,6 +128,48 @@ export default function DonationDetails() {
         : undefined,
     [signer, library]
   );
+  const challengeContract = useMemo<Challenge | undefined>(
+    () =>
+      signer && donationContract && donation && donation.recentchallengeaddr
+        ? (
+          new Contract(donation.recentchallengeaddr, challengeAbi, library) as Challenge
+        ).connect(signer)
+        : undefined,
+    [signer, library, donationContract, donation]
+  );
+
+  const _handleUserChallenge = async () => {
+    if (!donationContract || !usdc || !account || !donationAddress || !donation) {
+      alert("Connect wallet first");
+      return;
+    }
+
+    const tx = await usdc.approve(
+      donationAddress,
+      donation.bounty
+    );
+    await tx.wait(1);
+    console.log("Bounty amount : ", donation.bounty);
+    await donationContract.openChallenge("ChallengeDesc");
+  };
+
+  const _handleVoteYes = async () => {
+    if (!challengeContract) {
+      alert("Connect wallet first");
+      return;
+    }
+
+    await challengeContract.vote(true);
+  };
+
+  const _handleVoteNo = async () => {
+    if (!challengeContract) {
+      alert("Connect wallet first");
+      return;
+    }
+
+    await challengeContract.vote(false);
+  };
 
   const _handleUserDonation = async () => {
     if (!donationContract || !usdc || !account || !donationAddress) {
@@ -182,6 +227,39 @@ export default function DonationDetails() {
                 Bounty Pool: {utils.formatUnits(donation.bounty)} USDC
               </BountyPool>
             </MatchWrapper>
+
+            {donation.challengesLength === 0 || !donation.recentchallenge ? (
+              <></>
+            ) : (
+              <ChallengeWrapper>
+                Recent Challenge Info
+                <ChallengeEntity>
+                  challenger:{" "}
+                  {donation.recentchallenge.challenger}
+                </ChallengeEntity>
+                <ChallengeEntity>
+                  desc:{" "}
+                  {donation.recentchallenge.desc}
+                </ChallengeEntity>
+                <ChallengeEntity>
+                  votableUntil:{" "}
+                  {new Date(donation.recentchallenge.votableUntil * 1000).toLocaleString()}
+                </ChallengeEntity>
+                <ChallengeEntity>
+                  Votes(yes/no(max)): {donation.recentchallenge.yesVotes}/{donation.recentchallenge.noVotes} ({donation.recentchallenge.maxVoter})
+                </ChallengeEntity>
+                <ChallengeEntity>
+                  Status:{" "}
+                  {donation.recentchallenge.status}
+                </ChallengeEntity>
+
+                <CreateButton onClick={_handleVoteYes}>Vote yes!!</CreateButton>
+                <CreateButton onClick={_handleVoteNo}>Vote no!!</CreateButton>
+              </ChallengeWrapper>
+            )
+            }
+
+            <CreateButton onClick={_handleUserChallenge}>Challenge!!</CreateButton>
 
             <StyledInput
               value={donationAmount}

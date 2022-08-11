@@ -11,6 +11,17 @@ contract Challenge {
         Approved
     }
 
+    struct ChallengeData {
+        address contractAddress;
+        address challenger;
+        string desc;
+        uint256 votableUntil;
+        uint256 maxVoter;
+        uint256 yesVotes;
+        uint256 noVotes;
+        uint256 status;
+    }
+
     // TODO : CUSTOM QUORUM
     uint256 public immutable quorumPermil = 200;
     uint256 public immutable requiredApprovalRatioPermil = 600;
@@ -31,6 +42,20 @@ contract Challenge {
 
     constructor() {
         donation = msg.sender;
+    }
+
+    function getChallengeData() public view returns (ChallengeData memory) {
+        return
+            ChallengeData({
+                contractAddress: address(this),
+                challenger: challenger,
+                desc: desc,
+                votableUntil: votableUntil,
+                maxVoter: maxVoter,
+                yesVotes: yesVotes,
+                noVotes: noVotes,
+                status: uint256(status)
+            });
     }
 
     // TODO : CUSTOM START/END

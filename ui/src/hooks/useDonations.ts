@@ -11,6 +11,17 @@ import {
 } from "contracts";
 import { donationAbi, donationFactoryAbi, challengeAbi } from "../abis";
 
+export interface ChallengeInterface {
+  contractAddress: string;
+  challenger: string;
+  desc: string;
+  votableUntil: number;
+  maxVoter: number;
+  yesVotes: number;
+  noVotes: number;
+  status: number;
+}
+
 export interface DonationInterface {
   contractAddress: string;
   token: string;
@@ -39,7 +50,21 @@ export interface DonationInterface {
   refundAmountAfterStopped: BigNumber;
   bountyClaimed: boolean;
   myDonation: number;
-  challenger?: string;
+  recentchallengeaddr?: string;
+  recentchallenge?: ChallengeInterface;
+}
+
+export function convertToChallengeInterface(challengeDataArr: any) {
+  return {
+    contractAddress: challengeDataArr[0] as string,
+    challenger: challengeDataArr[1] as string,
+    desc: challengeDataArr[2] as string,
+    votableUntil: challengeDataArr[3].toNumber(),
+    maxVoter: challengeDataArr[4].toNumber(),
+    yesVotes: challengeDataArr[5].toNumber(),
+    noVotes: challengeDataArr[6].toNumber(),
+    status: challengeDataArr[7].toNumber(),
+  };
 }
 
 export function convertToDonationInterface(
@@ -83,7 +108,7 @@ function isMyDonation(donation: DonationInterface, myAddress: string) {
     donation.org === myAddress ||
     donation.whale === myAddress ||
     donation.myDonation > 0 ||
-    donation.challenger === myAddress
+    donation.recentchallenge?.challenger === myAddress
   );
 }
 
@@ -128,15 +153,15 @@ export const useDonations = (
 
       if (donationData.challengesLength > 0) {
         const recentChallengeAddress = await donation.getRecentChallenge();
+        donationData.recentchallengeaddr = recentChallengeAddress;
         const recentChallenge = new Contract(
           recentChallengeAddress,
           challengeAbi,
           library
         ) as Challenge;
-        const recentChallengeData = (await recentChallenge.getInfo()).map((x) =>
-          BigNumber.isBigNumber(x) ? x.toNumber() : x
-        );
-        donationData.challenger = recentChallengeData[0] as string;
+        const challengeDataArr = await recentChallenge.getChallengeData();
+        donationData.recentchallenge =
+          convertToChallengeInterface(challengeDataArr);
       }
       _donations.push(donationData);
       if (myAddress && isMyDonation(donationData, myAddress)) {
