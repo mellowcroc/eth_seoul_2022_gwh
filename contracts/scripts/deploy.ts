@@ -5,7 +5,6 @@ import {
   Challenge__factory,
   Donation,
   DonationFactory,
-  DonationFactory__factory,
   Donation__factory,
   USDC,
   USDC__factory,
@@ -62,33 +61,19 @@ async function distributeTokens() {
   const userAmount = convertTo18Decimals(userDonating * 5);
   const challengerAmount = convertTo18Decimals(ccollateral * 2);
 
-  const receipt = await usdc.transfer(whale.address, whaleAmount);
-  await receipt.wait(1);
+  const transferTx1 = await usdc.transfer(whale.address, whaleAmount);
+  await transferTx1.wait(1);
   console.log(`Distribute ${whale.address} USDC to ${whaleAmount}`);
-
-  await usdc.transfer(challenger.address, challengerAmount);
+  const transferTx2 = await usdc.transfer(challenger.address, challengerAmount);
+  await transferTx2.wait(1);
   console.log(`Distribute ${challenger.address} USDC to ${challengerAmount}`);
 
   for (const u of [user1, user2, user3]) {
-    await usdc.transfer(u.address, userAmount);
+    const transferTx = await usdc.transfer(u.address, userAmount);
+    await transferTx.wait(1);
     console.log(`Distribute ${u.address} USDC to ${userAmount}`);
   }
   console.log("===========================");
-}
-
-async function connectToExistContract() {
-  [admin, org, whale, challenger, user1, user2, user3, user4] =
-    await ethers.getSigners();
-
-  usdc = USDC__factory.connect(
-    "0x8169F403483B413c9a4Fba9D921aF49C3eF3BCf7",
-    admin
-  );
-
-  donationFactory = DonationFactory__factory.connect(
-    "0x1B8803F11e946767f8AF9595B22f74a637b0458D",
-    admin
-  );
 }
 
 async function generateFundingStateDonation() {
@@ -112,11 +97,13 @@ async function generateFundingStateDonation() {
   const donationAddress = await donationFactory.allDonations(
     (await donationFactory.donationCount()).toNumber() - 1
   );
+
   return Donation__factory.connect(donationAddress, whale);
 }
 
 async function generateEmissionStateDonation() {
   const donation = await generateFundingStateDonation();
+
   const donationAmount = convertTo18Decimals(userDonating);
   for (const u of [user1, user2, user3]) {
     const approveTx = await usdc
@@ -126,8 +113,9 @@ async function generateEmissionStateDonation() {
     const donateTx = await donation.connect(u).donate(donationAmount);
     await donateTx.wait(1);
   }
-  // await ethers.provider.send("evm_increaseTime", [3600 * 24 * 30]);
-  // await ethers.provider.send("evm_mine", []);
+
+  await ethers.provider.send("evm_increaseTime", [3600 * 24 * 30]);
+  await ethers.provider.send("evm_mine", []);
   return donation;
 }
 
@@ -136,8 +124,12 @@ async function generateFinishedStateDonation() {
 
   const donationAmount = convertTo18Decimals(userDonating);
   for (const u of [user1, user2, user3]) {
-    await usdc.connect(u).approve(donation.address, donationAmount);
-    await donation.connect(u).donate(donationAmount);
+    const approveTx = await usdc
+      .connect(u)
+      .approve(donation.address, donationAmount);
+    await approveTx.wait(1);
+    const donateTx = await donation.connect(u).donate(donationAmount);
+    await donateTx.wait(1);
   }
 
   await ethers.provider.send("evm_increaseTime", [3600 * 24 * 360]);
@@ -156,10 +148,14 @@ async function generateChallengingStateDonation(): Promise<
   await ethers.provider.send("evm_increaseTime", [3600 * 24 * 60]);
   await ethers.provider.send("evm_mine", []);
 
-  await usdc
+  const approveTx = await usdc
     .connect(challenger)
     .approve(await donation.getDAOAddress(), convertTo18Decimals(ccollateral));
-  await donation.connect(challenger).openChallenge("Simple challenge");
+  await approveTx.wait(1);
+  const challengeTx = await donation
+    .connect(challenger)
+    .openChallenge("Simple challenge");
+  await challengeTx.wait(1);
   const challengeAddr = await donation.getRecentChallenge();
   const challenge = Challenge__factory.connect(challengeAddr, challenger);
 
@@ -169,40 +165,42 @@ async function generateChallengingStateDonation(): Promise<
 async function generateStoppedStateDonation(): Promise<[Donation, Challenge]> {
   const [donation, challenge] = await generateChallengingStateDonation();
 
-  await challenge.connect(user1).vote(true);
-  await challenge.connect(user2).vote(true);
-  await challenge.connect(whale).vote(true);
+  const voteTx1 = await challenge.connect(user1).vote(true);
+  await voteTx1.wait(1);
+  const voteTx2 = await challenge.connect(user2).vote(true);
+  await voteTx2.wait(1);
+  const voteTx3 = await challenge.connect(whale).vote(true);
+  await voteTx3.wait(1);
 
   await ethers.provider.send("evm_increaseTime", [3600 * 24 * 15]);
   await ethers.provider.send("evm_mine", []);
 
-  await challenge.connect(admin).closeChallenge();
-  await donation.connect(admin).stop();
+  const closeTx = await challenge.connect(admin).closeChallenge();
+  await closeTx.wait(1);
+  const stopTx = await donation.connect(admin).stop();
+  await stopTx.wait(1);
 
   return [donation, challenge];
 }
 
 async function main() {
-  // await deployContract();
-  // await distributeTokens();
-
-  await connectToExistContract();
-
-  // finDonation = await generateFinishedStateDonation();
+  await deployContract();
+  await distributeTokens();
+  finDonation = await generateFinishedStateDonation();
 
   emiDonation = await generateEmissionStateDonation();
   console.log(`Emission State Donation: ${emiDonation.address}`);
   console.log("===========================");
 
-  // [stpDonation, approvedChallenge] = await generateStoppedStateDonation();
-  // console.log(`Stopped State Donation: ${stpDonation.address}`);
-  // console.log(`Approved Challenge: ${approvedChallenge.address}`);
-  // console.log("===========================");
+  [stpDonation, approvedChallenge] = await generateStoppedStateDonation();
+  console.log(`Stopped State Donation: ${stpDonation.address}`);
+  console.log(`Approved Challenge: ${approvedChallenge.address}`);
+  console.log("===========================");
 
-  // [chaDonation, ongoingChallenge] = await generateChallengingStateDonation();
-  // console.log(`Challenge State Donation: ${chaDonation.address}`);
-  // console.log(`Ongoing Challenge: ${ongoingChallenge.address}`);
-  // console.log("===========================");
+  [chaDonation, ongoingChallenge] = await generateChallengingStateDonation();
+  console.log(`Challenge State Donation: ${chaDonation.address}`);
+  console.log(`Ongoing Challenge: ${ongoingChallenge.address}`);
+  console.log("===========================");
 
   funDonation = await generateFundingStateDonation();
   console.log(`Funding State Donation: ${funDonation.address}`);

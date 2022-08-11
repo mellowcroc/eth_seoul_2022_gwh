@@ -22,6 +22,10 @@ contract DonationFactory {
         donationCount = 0;
     }
 
+    function numDonations() public view returns (uint256) {
+        return allDonations.length;
+    }
+
     function reserveChallengeCollateral(address sender) public {
         IERC20(token).transferFrom(sender, address(this), CHALLENGE_COLLATERAL);
     }
@@ -47,12 +51,12 @@ contract DonationFactory {
         assembly {
             donation := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
+        IERC20(token).approve(donation, whaleDonationMax_ + bounty_);
         IERC20(token).transferFrom(
             msg.sender,
-            address(this),
+            donation,
             whaleDonationMax_ + bounty_
         );
-        IERC20(token).transfer(donation, whaleDonationMax_ + bounty_);
         Donation(donation).initialize(
             token,
             name_,

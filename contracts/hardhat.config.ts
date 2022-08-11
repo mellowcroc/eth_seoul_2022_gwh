@@ -26,6 +26,9 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 const config: HardhatUserConfig = {
   solidity: "0.8.4",
   networks: {
+    hardhat: {
+      chainId: 1337,
+    },
     ropsten: {
       url: process.env.ROPSTEN_URL || "",
       accounts:
@@ -34,21 +37,23 @@ const config: HardhatUserConfig = {
     mumbai: {
       url: process.env.MUMBAI_URL || "",
       accounts:
-        process.env.ADMIN_KEY !== undefined &&
-        process.env.ORG_KEY !== undefined &&
-        process.env.WHALE_KEY !== undefined &&
-        process.env.CHALLENGER_KEY !== undefined &&
-        process.env.USER1_KEY !== undefined &&
-        process.env.USER2_KEY !== undefined &&
-        process.env.USER3_KEY !== undefined
+        process.env.ADMIN !== undefined &&
+        process.env.ORG !== undefined &&
+        process.env.WHALE !== undefined &&
+        process.env.CHALLENGER !== undefined &&
+        process.env.USER1 !== undefined &&
+        process.env.USER2 !== undefined &&
+        process.env.USER3 !== undefined &&
+        process.env.USER4 !== undefined
           ? [
-              process.env.ADMIN_KEY,
-              process.env.ORG_KEY,
-              process.env.WHALE_KEY,
-              process.env.CHALLENGER_KEY,
-              process.env.USER1_KEY,
-              process.env.USER2_KEY,
-              process.env.USER3_KEY,
+              process.env.ADMIN,
+              process.env.ORG,
+              process.env.WHALE,
+              process.env.CHALLENGER,
+              process.env.USER1,
+              process.env.USER2,
+              process.env.USER3,
+              process.env.USER4,
             ]
           : [],
     },

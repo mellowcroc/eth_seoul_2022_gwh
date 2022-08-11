@@ -1,11 +1,13 @@
-import React, { useState, Component } from 'react';
-import { Link } from 'react-router-dom';
-import styled from 'styled-components';
+import React, { useState, Component } from "react";
+import { Link } from "react-router-dom";
+import styled from "styled-components";
 import Slider from "react-slick";
 // Import css files
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import Header from '../components/Header';
+import Header from "../components/Header";
+import { useDonations } from "../hooks/useDonations";
+import { DONATION_FACTORY } from "../contracts";
 
 const HeaderContainer = styled.div`
   width: 100%;
@@ -127,36 +129,37 @@ const DonationLink = styled(Link)`
 `;
 
 interface DonationPreview {
-  id: string,
-  name: string,
-  description: string,
-  whaleAddress: string,
-  orgAddress: string,
+  address: string;
+  name: string;
+  description: string;
+  whaleAddress: string;
+  orgAddress: string;
 }
 
 interface ISlideItemProps {
-  donation: DonationPreview,
+  donation: DonationPreview;
 }
 
 class DonationSlideItem extends Component<ISlideItemProps> {
   render() {
     const { donation, ...props } = this.props;
     return (
-      <div style={{margin: '10px', padding: '2%'}}>
+      <div style={{ margin: "10px", padding: "2%" }}>
         <DonationItem {...props}>
           <DonationInner>
             <DonationTitle>{donation.name}</DonationTitle>
             <div>{donation.description}</div>
             <div>Org: {donation.orgAddress}</div>
             <div>Whale: {donation.whaleAddress}</div>
-            <DonationLink to={`/donation-details?id=${donation.id}`}>See details</DonationLink>
+            <DonationLink to={`/donation-details?address=${donation.address}`}>
+              See details
+            </DonationLink>
           </DonationInner>
         </DonationItem>
       </div>
     );
   }
 }
-
 
 export default function Home() {
   const sliderSettings = {
@@ -173,123 +176,158 @@ export default function Home() {
     // speed: 500
   };
 
+  const { donations, myDonations } = useDonations(DONATION_FACTORY, "");
+  const fundingDonations = [];
+  const emittingDonations = [];
+  const finishedDonations = [];
+  console.log("donations length: ", donations.length);
+  for (let i = 0; i < donations.length; i++) {
+    console.log("donations[i].stage: ", donations[i].stage);
+    console.log("donations[i].contractAddress: ", donations[i].contractAddress);
+    if (donations[i].stage === "Funding") {
+      console.log("inside funding");
+      fundingDonations.push({
+        address: donations[i].contractAddress,
+        name: donations[i].name,
+        description: donations[i].description,
+        whaleAddress: donations[i].whale,
+        orgAddress: donations[i].org,
+      });
+    } else if (donations[i].stage === "Emitting") {
+      emittingDonations.push({
+        address: donations[i].contractAddress,
+        name: donations[i].name,
+        description: donations[i].description,
+        whaleAddress: donations[i].whale,
+        orgAddress: donations[i].org,
+      });
+    } else if (donations[i].stage === "Finished") {
+      finishedDonations.push({
+        address: donations[i].contractAddress,
+        name: donations[i].name,
+        description: donations[i].description,
+        whaleAddress: donations[i].whale,
+        orgAddress: donations[i].org,
+      });
+    }
+  }
   // TODO(): get the actual data from ethereum
-  const [fundingDonations, setFundingDonations] = useState([
-    {
-      id: 'funding1',
-      name: 'Donation # 1',
-      description: 'Description..... blabalbalbalblablalbllab',
-      whaleAddress: '0xABCD...ABCD',
-      orgAddress: '0x1234...1234',
-    },
-    {
-      id: 'funding2',
-      name: 'Donation # 2',
-      description: 'Description..... blabalbalbalblablalbllab',
-      whaleAddress: '0xABCD...ABCD',
-      orgAddress: '0x1234...1234',
-    },
-    {
-      id: 'funding3',
-      name: 'Donation # 3',
-      description: 'Description..... blabalbalbalblablalbllab',
-      whaleAddress: '0xABCD...ABCD',
-      orgAddress: '0x1234...1234',
-    },
-    {
-      id: 'funding4',
-      name: 'Donation # 4',
-      description: 'Description..... blabalbalbalblablalbllab',
-      whaleAddress: '0xABCD...ABCD',
-      orgAddress: '0x1234...1234',
-    },
-    {
-      id: 'funding5',
-      name: 'Donation # 5',
-      description: 'Description..... blabalbalbalblablalbllab',
-      whaleAddress: '0xABCD...ABCD',
-      orgAddress: '0x1234...1234',
-    },
-  ]);
+  // const [fundingDonations, setFundingDonations] = useState([
+  //   {
+  //     id: "funding1",
+  //     name: "Donation # 1",
+  //     description: "Description..... blabalbalbalblablalbllab",
+  //     whaleAddress: "0xABCD...ABCD",
+  //     orgAddress: "0x1234...1234",
+  //   },
+  //   {
+  //     id: "funding2",
+  //     name: "Donation # 2",
+  //     description: "Description..... blabalbalbalblablalbllab",
+  //     whaleAddress: "0xABCD...ABCD",
+  //     orgAddress: "0x1234...1234",
+  //   },
+  //   {
+  //     id: "funding3",
+  //     name: "Donation # 3",
+  //     description: "Description..... blabalbalbalblablalbllab",
+  //     whaleAddress: "0xABCD...ABCD",
+  //     orgAddress: "0x1234...1234",
+  //   },
+  //   {
+  //     id: "funding4",
+  //     name: "Donation # 4",
+  //     description: "Description..... blabalbalbalblablalbllab",
+  //     whaleAddress: "0xABCD...ABCD",
+  //     orgAddress: "0x1234...1234",
+  //   },
+  //   {
+  //     id: "funding5",
+  //     name: "Donation # 5",
+  //     description: "Description..... blabalbalbalblablalbllab",
+  //     whaleAddress: "0xABCD...ABCD",
+  //     orgAddress: "0x1234...1234",
+  //   },
+  // ]);
   // TODO(): get the actual data from ethereum
-  const [emittingDonations, setEmittingDonations] = useState([
-    {
-      id: 'emitting1',
-      name: 'Emitting Donation # 1',
-      description: 'Description..... blabalbalbalblablalbllab',
-      whaleAddress: '0xABCD...ABCD',
-      orgAddress: '0x1234...1234',
-    },
-    {
-      id: 'emitting2',
-      name: 'Emitting Donation # 2',
-      description: 'Description..... blabalbalbalblablalbllab',
-      whaleAddress: '0xABCD...ABCD',
-      orgAddress: '0x1234...1234',
-    },
-    {
-      id: 'emitting3',
-      name: 'Emitting Donation # 3',
-      description: 'Description..... blabalbalbalblablalbllab',
-      whaleAddress: '0xABCD...ABCD',
-      orgAddress: '0x1234...1234',
-    },
-    {
-      id: 'emitting4',
-      name: 'Emitting Donation # 4',
-      description: 'Description..... blabalbalbalblablalbllab',
-      whaleAddress: '0xABCD...ABCD',
-      orgAddress: '0x1234...1234',
-    },
-    {
-      id: 'emitting5',
-      name: 'Emitting Donation # 5',
-      description: 'Description..... blabalbalbalblablalbllab',
-      whaleAddress: '0xABCD...ABCD',
-      orgAddress: '0x1234...1234',
-    },
-  ]);
+  // const [emittingDonations, setEmittingDonations] = useState([
+  //   {
+  //     id: "emitting1",
+  //     name: "Emitting Donation # 1",
+  //     description: "Description..... blabalbalbalblablalbllab",
+  //     whaleAddress: "0xABCD...ABCD",
+  //     orgAddress: "0x1234...1234",
+  //   },
+  //   {
+  //     id: "emitting2",
+  //     name: "Emitting Donation # 2",
+  //     description: "Description..... blabalbalbalblablalbllab",
+  //     whaleAddress: "0xABCD...ABCD",
+  //     orgAddress: "0x1234...1234",
+  //   },
+  //   {
+  //     id: "emitting3",
+  //     name: "Emitting Donation # 3",
+  //     description: "Description..... blabalbalbalblablalbllab",
+  //     whaleAddress: "0xABCD...ABCD",
+  //     orgAddress: "0x1234...1234",
+  //   },
+  //   {
+  //     id: "emitting4",
+  //     name: "Emitting Donation # 4",
+  //     description: "Description..... blabalbalbalblablalbllab",
+  //     whaleAddress: "0xABCD...ABCD",
+  //     orgAddress: "0x1234...1234",
+  //   },
+  //   {
+  //     id: "emitting5",
+  //     name: "Emitting Donation # 5",
+  //     description: "Description..... blabalbalbalblablalbllab",
+  //     whaleAddress: "0xABCD...ABCD",
+  //     orgAddress: "0x1234...1234",
+  //   },
+  // ]);
   // TODO(): get the actual data from ethereum
-  const [finishedDonations, setFinishedDonations] = useState([
-    {
-      id: 'finished1',
-      name: 'Finished Donation # 1',
-      description: 'Description..... blabalbalbalblablalbllab',
-      whaleAddress: '0xABCD...ABCD',
-      orgAddress: '0x1234...1234',
-    },
-    {
-      id: 'finished2',
-      name: 'Finished Donation # 2',
-      description: 'Description..... blabalbalbalblablalbllab',
-      whaleAddress: '0xABCD...ABCD',
-      orgAddress: '0x1234...1234',
-    },
-    {
-      id: 'finished3',
-      name: 'Finished Donation # 3',
-      description: 'Description..... blabalbalbalblablalbllab',
-      whaleAddress: '0xABCD...ABCD',
-      orgAddress: '0x1234...1234',
-    },
-    {
-      id: 'finished4',
-      name: 'Finished Donation # 4',
-      description: 'Description..... blabalbalbalblablalbllab',
-      whaleAddress: '0xABCD...ABCD',
-      orgAddress: '0x1234...1234',
-    },
-    {
-      id: 'finished5',
-      name: 'Finished Donation # 5',
-      description: 'Description..... blabalbalbalblablalbllab',
-      whaleAddress: '0xABCD...ABCD',
-      orgAddress: '0x1234...1234',
-    },
-  ]);
+  // const [finishedDonations, setFinishedDonations] = useState([
+  //   {
+  //     id: "finished1",
+  //     name: "Finished Donation # 1",
+  //     description: "Description..... blabalbalbalblablalbllab",
+  //     whaleAddress: "0xABCD...ABCD",
+  //     orgAddress: "0x1234...1234",
+  //   },
+  //   {
+  //     id: "finished2",
+  //     name: "Finished Donation # 2",
+  //     description: "Description..... blabalbalbalblablalbllab",
+  //     whaleAddress: "0xABCD...ABCD",
+  //     orgAddress: "0x1234...1234",
+  //   },
+  //   {
+  //     id: "finished3",
+  //     name: "Finished Donation # 3",
+  //     description: "Description..... blabalbalbalblablalbllab",
+  //     whaleAddress: "0xABCD...ABCD",
+  //     orgAddress: "0x1234...1234",
+  //   },
+  //   {
+  //     id: "finished4",
+  //     name: "Finished Donation # 4",
+  //     description: "Description..... blabalbalbalblablalbllab",
+  //     whaleAddress: "0xABCD...ABCD",
+  //     orgAddress: "0x1234...1234",
+  //   },
+  //   {
+  //     id: "finished5",
+  //     name: "Finished Donation # 5",
+  //     description: "Description..... blabalbalbalblablalbllab",
+  //     whaleAddress: "0xABCD...ABCD",
+  //     orgAddress: "0x1234...1234",
+  //   },
+  // ]);
 
   return (
-    <div style={{width: '100%'}}>
+    <div style={{ width: "100%" }}>
       <HeaderContainer>
         <Header />
       </HeaderContainer>
@@ -297,51 +335,42 @@ export default function Home() {
         <HeroImage />
         <Content>
           {/* 다른 더 좋은 phrase 환영합니다!! */}
-          <MainPhrase>
-            Do the most good possible with what you have.
-          </MainPhrase>
+          <MainPhrase>Do the most good possible with what you have.</MainPhrase>
 
           <ButtonWrapper>
-            <CreateButton to='/create-donation'>Create a new donation</CreateButton>
-            <MyPageButton to='/my-donations'>View my donations</MyPageButton>
+            <CreateButton to="/create-donation">
+              Create a new donation
+            </CreateButton>
+            <MyPageButton to="/my-donations">View my donations</MyPageButton>
           </ButtonWrapper>
 
           {/* Funding donations */}
           <SliderContainer>
-            <h3>
-              Funding Donations
-            </h3>
+            <h3>Funding Donations</h3>
             <Slider {...sliderSettings}>
-              {
-                fundingDonations
-                  .map((donation: DonationPreview, index) => <DonationSlideItem donation={donation} key={index}/>)
-              }
+              {fundingDonations.map((donation: DonationPreview, index) => (
+                <DonationSlideItem donation={donation} key={index} />
+              ))}
             </Slider>
           </SliderContainer>
 
           {/* Emitting donations */}
           <SliderContainer>
-            <h3>
-              Emitting Donations
-            </h3>
+            <h3>Emitting Donations</h3>
             <Slider {...sliderSettings}>
-              {
-                emittingDonations
-                  .map((donation: DonationPreview, index) => <DonationSlideItem donation={donation} key={index}/>)
-              }
+              {emittingDonations.map((donation: DonationPreview, index) => (
+                <DonationSlideItem donation={donation} key={index} />
+              ))}
             </Slider>
           </SliderContainer>
 
           {/* Stopped / Finished donations */}
           <SliderContainer>
-            <h3>
-              Past Donations
-            </h3>
+            <h3>Past Donations</h3>
             <Slider {...sliderSettings}>
-              {
-                finishedDonations
-                  .map((donation: DonationPreview, index) => <DonationSlideItem donation={donation} key={index}/>)
-              }
+              {finishedDonations.map((donation: DonationPreview, index) => (
+                <DonationSlideItem donation={donation} key={index} />
+              ))}
             </Slider>
           </SliderContainer>
         </Content>

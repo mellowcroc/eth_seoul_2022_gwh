@@ -10,12 +10,12 @@ function Connect() {
 
   return (
     <div>
-      {!!library && chainId !== 4 && (
+      {!!library && chainId !== 1337 && (
         <button
           onClick={async () => {
             try {
               await library.send("wallet_switchEthereumChain", [
-                { chainId: "0x4" },
+                { chainId: "0x539" },
               ]);
             } catch (error) {
               console.log(error);
@@ -25,6 +25,21 @@ function Connect() {
           Switch network!
         </button>
       )}
+      {/* {!!library && chainId !== 80001 && (
+        <button
+          onClick={async () => {
+            try {
+              await library.send("wallet_switchEthereumChain", [
+                { chainId: "0x13881" },
+              ]);
+            } catch (error) {
+              console.log(error);
+            }
+          }}
+        >
+          Switch network!
+        </button>
+      )} */}
       {!account && (
         <button onClick={() => activateBrowserWallet()}>
           Connect browser wallet
