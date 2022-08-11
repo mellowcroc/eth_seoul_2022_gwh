@@ -48,7 +48,7 @@ const HeroImage = styled.div`
 `;
 
 const SliderContainer = styled.div`
-  padding: 60px;
+  padding: 30px;
   display: block;
 `;
 
@@ -58,7 +58,8 @@ const Content = styled.div`
 `;
 
 const MainPhrase = styled.h2`
-  margin: 100px;
+  margin: 50px;
+  font-size: 50px;
 `;
 
 const ButtonWrapper = styled.div`
@@ -70,7 +71,7 @@ const ButtonWrapper = styled.div`
 const CreateButton = styled(Link)`
   height: 60px;
   padding: 30px;
-  font-size: 30px;
+  font-size: 20px;
   text-decoration: none;
   background: rgba(0, 140, 210, 0.5);
   border-radius: 100px;
@@ -78,13 +79,13 @@ const CreateButton = styled(Link)`
   width: fit-content;
   display: flex;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 10px;
 `;
 
 const MyPageButton = styled(Link)`
-  height: 50px;
-  padding: 30px;
-  font-size: 30px;
+  height: 30px;
+  padding: 20px;
+  font-size: 20px;
   text-decoration: none;
   background: transparent;
   color: #fff;
@@ -102,8 +103,7 @@ const DonationItem = styled.div`
   background: #1674bee8;
   position: relative;
   text-align: center;
-  font-size: 20px;
-  height: 200px;
+  font-size: 18px;
   display: flex;
   align-items: center;
   border-radius: 50px;
@@ -119,7 +119,7 @@ const DonationInner = styled.div`
 
 const DonationTitle = styled.div`
   font-weight: 800;
-  padding-bottom: 8px;
+  padding-bottom: 10px;
 `;
 
 const DonationLink = styled(Link)`
@@ -148,10 +148,10 @@ class DonationSlideItem extends Component<ISlideItemProps> {
         <DonationItem {...props}>
           <DonationInner>
             <DonationTitle>{donation.name}</DonationTitle>
-            <div>Contract address: {donation.address}</div>
             <div>Description: {donation.description}</div>
-            <div>Org: {donation.orgAddress}</div>
-            <div>Whale: {donation.whaleAddress}</div>
+            {/* <div>Contract: {donation.address}</div> */}
+            {/* <div>Whale: {donation.whaleAddress}</div> */}
+
             <DonationLink to={`/donation-details?address=${donation.address}`}>
               See details
             </DonationLink>
@@ -183,10 +183,7 @@ export default function Home() {
   const finishedDonations = [];
   console.log("donations length: ", donations.length);
   for (let i = 0; i < donations.length; i++) {
-    console.log("donations[i].stage: ", donations[i].stage);
-    console.log("donations[i].contractAddress: ", donations[i].contractAddress);
     if (donations[i].stage === "Funding") {
-      console.log("inside funding");
       fundingDonations.push({
         address: donations[i].contractAddress,
         name: donations[i].name,
@@ -215,120 +212,6 @@ export default function Home() {
       });
     }
   }
-  // TODO(): get the actual data from ethereum
-  // const [fundingDonations, setFundingDonations] = useState([
-  //   {
-  //     id: "funding1",
-  //     name: "Donation # 1",
-  //     description: "Description..... blabalbalbalblablalbllab",
-  //     whaleAddress: "0xABCD...ABCD",
-  //     orgAddress: "0x1234...1234",
-  //   },
-  //   {
-  //     id: "funding2",
-  //     name: "Donation # 2",
-  //     description: "Description..... blabalbalbalblablalbllab",
-  //     whaleAddress: "0xABCD...ABCD",
-  //     orgAddress: "0x1234...1234",
-  //   },
-  //   {
-  //     id: "funding3",
-  //     name: "Donation # 3",
-  //     description: "Description..... blabalbalbalblablalbllab",
-  //     whaleAddress: "0xABCD...ABCD",
-  //     orgAddress: "0x1234...1234",
-  //   },
-  //   {
-  //     id: "funding4",
-  //     name: "Donation # 4",
-  //     description: "Description..... blabalbalbalblablalbllab",
-  //     whaleAddress: "0xABCD...ABCD",
-  //     orgAddress: "0x1234...1234",
-  //   },
-  //   {
-  //     id: "funding5",
-  //     name: "Donation # 5",
-  //     description: "Description..... blabalbalbalblablalbllab",
-  //     whaleAddress: "0xABCD...ABCD",
-  //     orgAddress: "0x1234...1234",
-  //   },
-  // ]);
-  // TODO(): get the actual data from ethereum
-  // const [emittingDonations, setEmittingDonations] = useState([
-  //   {
-  //     id: "emitting1",
-  //     name: "Emitting Donation # 1",
-  //     description: "Description..... blabalbalbalblablalbllab",
-  //     whaleAddress: "0xABCD...ABCD",
-  //     orgAddress: "0x1234...1234",
-  //   },
-  //   {
-  //     id: "emitting2",
-  //     name: "Emitting Donation # 2",
-  //     description: "Description..... blabalbalbalblablalbllab",
-  //     whaleAddress: "0xABCD...ABCD",
-  //     orgAddress: "0x1234...1234",
-  //   },
-  //   {
-  //     id: "emitting3",
-  //     name: "Emitting Donation # 3",
-  //     description: "Description..... blabalbalbalblablalbllab",
-  //     whaleAddress: "0xABCD...ABCD",
-  //     orgAddress: "0x1234...1234",
-  //   },
-  //   {
-  //     id: "emitting4",
-  //     name: "Emitting Donation # 4",
-  //     description: "Description..... blabalbalbalblablalbllab",
-  //     whaleAddress: "0xABCD...ABCD",
-  //     orgAddress: "0x1234...1234",
-  //   },
-  //   {
-  //     id: "emitting5",
-  //     name: "Emitting Donation # 5",
-  //     description: "Description..... blabalbalbalblablalbllab",
-  //     whaleAddress: "0xABCD...ABCD",
-  //     orgAddress: "0x1234...1234",
-  //   },
-  // ]);
-  // TODO(): get the actual data from ethereum
-  // const [finishedDonations, setFinishedDonations] = useState([
-  //   {
-  //     id: "finished1",
-  //     name: "Finished Donation # 1",
-  //     description: "Description..... blabalbalbalblablalbllab",
-  //     whaleAddress: "0xABCD...ABCD",
-  //     orgAddress: "0x1234...1234",
-  //   },
-  //   {
-  //     id: "finished2",
-  //     name: "Finished Donation # 2",
-  //     description: "Description..... blabalbalbalblablalbllab",
-  //     whaleAddress: "0xABCD...ABCD",
-  //     orgAddress: "0x1234...1234",
-  //   },
-  //   {
-  //     id: "finished3",
-  //     name: "Finished Donation # 3",
-  //     description: "Description..... blabalbalbalblablalbllab",
-  //     whaleAddress: "0xABCD...ABCD",
-  //     orgAddress: "0x1234...1234",
-  //   },
-  //   {
-  //     id: "finished4",
-  //     name: "Finished Donation # 4",
-  //     description: "Description..... blabalbalbalblablalbllab",
-  //     whaleAddress: "0xABCD...ABCD",
-  //     orgAddress: "0x1234...1234",
-  //   },
-  //   {
-  //     id: "finished5",
-  //     name: "Finished Donation # 5",
-  //     description: "Description..... blabalbalbalblablalbllab",
-  //     whaleAddress: "0xABCD...ABCD",
-  //     orgAddress: "0x1234...1234",
-  //   },
-  // ]);
 
   return (
     <div style={{ width: "100%" }}>
